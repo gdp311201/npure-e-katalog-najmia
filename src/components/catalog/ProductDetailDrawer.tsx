@@ -1,1 +1,247 @@
-'use client'import { useState, useEffect } from 'react'import Image from 'next/image'import {  Drawer,  DrawerContent,  DrawerHeader,  DrawerTitle,  DrawerDescription,  DrawerFooter,} from '@/components/ui/drawer'import { Button } from '@/components/ui/button'import { Badge } from '@/components/ui/badge'import { Separator } from '@/components/ui/separator'import { ScrollArea } from '@/components/ui/scroll-area'import { MessageCircle, Package, CheckCircle2, XCircle } from 'lucide-react'import { formatPrice, buildWhatsAppLink, type CatalogProduct } from '@/lib/supabase'interface ProductDetailDrawerProps {  product: CatalogProduct | null  open: boolean  onOpenChange: (open: boolean) => void  waNumber: string  waDefaultMsg: string  sessionId: string}export function ProductDetailDrawer({  product,  open,  onOpenChange,  waNumber,  waDefaultMsg,  sessionId,}: ProductDetailDrawerProps) {  const initialImg = product?.image_url_1 || product?.image_url_2 || null  const [activeImg, setActiveImg] = useState<string | null>(initialImg)  const [trackedProduct, setTrackedProduct] = useState<string | null>(null)  if (product && trackedProduct !== product.catalog_product_id) {    setTrackedProduct(product.catalog_product_id)    setActiveImg(initialImg)  } else if (!product && trackedProduct !== null) {    setTrackedProduct(null)    setActiveImg(null)  }  useEffect(() => {    if (open && product) {      fetch('/api/track', {        method: 'POST',        headers: { 'Content-Type': 'application/json' },        body: JSON.stringify({          type: 'view',          productId: product.catalog_product_id,          sessionId,        }),      }).catch(() => {})    }  }, [open, product, sessionId])  if (!product) return null  const images = [product.image_url_1, product.image_url_2].filter(    (img): img is string => Boolean(img)  )  const handleOrder = () => {    fetch('/api/track', {      method: 'POST',      headers: { 'Content-Type': 'application/json' },      body: JSON.stringify({        type: 'order_click',        productId: product.catalog_product_id,        sessionId,      }),    }).catch(() => {})    const msg = `${waDefaultMsg}\n\nProduk: ${product.name}\nHarga: ${formatPrice(      product.current_price    )}\nStatus stok: ${product.in_stock ? 'Tersedia' : 'Kosong (pre-order)'}\n\nMohon info selengkapnya ya. Terima kasih!`    const url = buildWhatsAppLink(waNumber, msg)    window.open(url, '_blank', 'noopener,noreferrer')  }  return (    <Drawer open={open} onOpenChange={onOpenChange}>      <DrawerContent className="max-h-[92vh]">        <DrawerHeader className="px-4 pt-3 pb-0 sm:px-6">          <DrawerTitle className="sr-only">{product.name}</DrawerTitle>          <DrawerDescription className="sr-only">            Detail produk {product.name}          </DrawerDescription>        </DrawerHeader>        <ScrollArea className="max-h-[80vh]">          <div className="px-4 pb-4 sm:px-6">            {/* Image gallery */}            <div className="space-y-3">              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">                {activeImg ? (                  <Image                    src={activeImg}                    alt={product.name}                    fill                    sizes="(max-width: 768px) 100vw, 50vw"                    className="object-cover"                    priority                  />                ) : (                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">                    <Package className="h-16 w-16" aria-hidden="true" />                  </div>                )}              </div>              {images.length > 1 && (                <div className="flex gap-2 overflow-x-auto pb-1">                  {images.map((img, idx) => (                    <button                      key={idx}                      type="button"                      onClick={() => setActiveImg(img)}                      className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md ring-2 transition ${                        activeImg === img ? 'ring-primary' : 'ring-transparent hover:ring-border'                      }`}                      aria-label={`Lihat gambar ${idx + 1}`}                      aria-pressed={activeImg === img}                    >                      <Image                        src={img}                        alt={`${product.name} - gambar ${idx + 1}`}                        fill                        sizes="64px"                        className="object-cover"                      />                    </button>                  ))}                </div>              )}            </div>            {/* Info */}            <div className="mt-4 space-y-3">              <div className="flex flex-wrap items-center gap-2">                {product.variant && (                  <Badge variant="secondary" className="font-medium">                    {product.variant}                  </Badge>                )}                {product.product_type && (                  <Badge variant="outline" className="font-medium">                    {product.product_type}                  </Badge>                )}                {product.is_featured && (                  <Badge className="bg-primary text-primary-foreground">                    ★ Featured                  </Badge>                )}              </div>              <h2 className="text-lg font-semibold leading-tight text-foreground sm:text-xl">                {product.name}              </h2>              <div className="flex items-baseline gap-3">                <span className="text-2xl font-bold text-primary">                  {formatPrice(product.current_price)}                </span>                <span className="inline-flex items-center gap-1 text-sm">                  {product.in_stock ? (                    <>                      <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />                      <span className="text-emerald-700 font-medium">Tersedia</span>                    </>                  ) : (                    <>                      <XCircle className="h-4 w-4 text-rose-600" aria-hidden="true" />                      <span className="text-rose-700 font-medium">Kosong (pre-order)</span>                    </>                  )}                </span>              </div>              {product.description && (                <>                  <Separator />                  <div>                    <h3 className="mb-1 text-sm font-semibold text-foreground">                      Deskripsi                    </h3>                    <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">                      {product.description}                    </p>                  </div>                </>              )}              {product.key_ingredients && (                <div>                  <h3 className="mb-1 text-sm font-semibold text-foreground">                    Key Ingredients                  </h3>                  <p className="text-sm leading-relaxed text-muted-foreground">                    {product.key_ingredients}                  </p>                </div>              )}              <div className="grid grid-cols-2 gap-3 text-sm">                {product.bpom_number && (                  <div>                    <p className="text-xs text-muted-foreground">Nomor BPOM</p>                    <p className="font-medium text-foreground">{product.bpom_number}</p>                  </div>                )}                {product.netto && (                  <div>                    <p className="text-xs text-muted-foreground">Isi / Netto</p>                    <p className="font-medium text-foreground">{product.netto}</p>                  </div>                )}              </div>            </div>          </div>        </ScrollArea>        <DrawerFooter className="px-4 pb-4 sm:px-6">          <Button            type="button"            size="lg"            className="w-full text-white"            style={{ backgroundColor: 'var(--theme-wa)' }}            onClick={handleOrder}            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--theme-wa-hover)')}            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--theme-wa)')}          >            <MessageCircle className="mr-2 h-5 w-5" aria-hidden="true" />            Pesan via WhatsApp          </Button>        </DrawerFooter>      </DrawerContent>    </Drawer>  )}
+'use client'
+
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+} from '@/components/ui/drawer'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { MessageCircle, Package, CheckCircle2, XCircle } from 'lucide-react'
+import { formatPrice, buildWhatsAppLink, type CatalogProduct } from '@/lib/supabase'
+
+interface ProductDetailDrawerProps {
+  product: CatalogProduct | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  waNumber: string
+  waDefaultMsg: string
+  sessionId: string
+}
+
+export function ProductDetailDrawer({
+  product,
+  open,
+  onOpenChange,
+  waNumber,
+  waDefaultMsg,
+  sessionId,
+}: ProductDetailDrawerProps) {
+  const initialImg = product?.image_url_1 || product?.image_url_2 || product?.image_url_3 || product?.image_url_4 || null
+  const [activeImg, setActiveImg] = useState<string | null>(initialImg)
+  const [trackedProduct, setTrackedProduct] = useState<string | null>(null)
+
+  if (product && trackedProduct !== product.catalog_product_id) {
+    setTrackedProduct(product.catalog_product_id)
+    setActiveImg(initialImg)
+  } else if (!product && trackedProduct !== null) {
+    setTrackedProduct(null)
+    setActiveImg(null)
+  }
+
+  useEffect(() => {
+    if (open && product) {
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'view',
+          productId: product.catalog_product_id,
+          sessionId,
+        }),
+      }).catch(() => {})
+    }
+  }, [open, product, sessionId])
+
+  if (!product) return null
+
+  const images = [product.image_url_1, product.image_url_2, product.image_url_3, product.image_url_4].filter(
+    (img): img is string => Boolean(img)
+  )
+
+  const handleOrder = () => {
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'order_click',
+        productId: product.catalog_product_id,
+        sessionId,
+      }),
+    }).catch(() => {})
+
+    const msg = `${waDefaultMsg}\n\nProduk: ${product.name}\nHarga: ${formatPrice(
+      product.current_price
+    )}\nStatus stok: ${product.in_stock ? 'Tersedia' : 'Kosong (pre-order)'}\n\nMohon info selengkapnya ya. Terima kasih!`
+    const url = buildWhatsAppLink(waNumber, msg)
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-h-[92vh]">
+        <DrawerHeader className="px-4 pt-3 pb-0 sm:px-6">
+          <DrawerTitle className="sr-only">{product.name}</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            Detail produk {product.name}
+          </DrawerDescription>
+        </DrawerHeader>
+
+        <ScrollArea className="max-h-[80vh]">
+          <div className="px-4 pb-4 sm:px-6">
+            {/* Image gallery */}
+            <div className="space-y-3">
+              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
+                {activeImg ? (
+                  <Image
+                    src={activeImg}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
+                    priority
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                    <Package className="h-16 w-16" aria-hidden="true" />
+                  </div>
+                )}
+              </div>
+
+              {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveImg(img)}
+                      className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md ring-2 transition ${
+                        activeImg === img ? 'ring-primary' : 'ring-transparent hover:ring-border'
+                      }`}
+                      aria-label={`Lihat gambar ${idx + 1}`}
+                      aria-pressed={activeImg === img}
+                    >
+                      <Image
+                        src={img}
+                        alt={`${product.name} - gambar ${idx + 1}`}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="mt-4 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {product.variant && (
+                  <Badge variant="secondary" className="font-medium">
+                    {product.variant}
+                  </Badge>
+                )}
+                {product.product_type && (
+                  <Badge variant="outline" className="font-medium">
+                    {product.product_type}
+                  </Badge>
+                )}
+                {product.is_featured && (
+                  <Badge className="bg-primary text-primary-foreground">
+                    ★ Featured
+                  </Badge>
+                )}
+              </div>
+
+              <h2 className="text-lg font-semibold leading-tight text-foreground sm:text-xl">
+                {product.name}
+              </h2>
+
+              <div className="flex items-baseline gap-3">
+                <span className="text-2xl font-bold text-primary">
+                  {formatPrice(product.current_price)}
+                </span>
+                <span className="inline-flex items-center gap-1 text-sm">
+                  {product.in_stock ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                      <span className="text-emerald-700 font-medium">Tersedia</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-4 w-4 text-rose-600" aria-hidden="true" />
+                      <span className="text-rose-700 font-medium">Kosong (pre-order)</span>
+                    </>
+                  )}
+                </span>
+              </div>
+
+              {product.description && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="mb-1 text-sm font-semibold text-foreground">
+                      Deskripsi
+                    </h3>
+                    <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      {product.description}
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {product.key_ingredients && (
+                <div>
+                  <h3 className="mb-1 text-sm font-semibold text-foreground">
+                    Key Ingredients
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {product.key_ingredients}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {product.bpom_number && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Nomor BPOM</p>
+                    <p className="font-medium text-foreground">{product.bpom_number}</p>
+                  </div>
+                )}
+                {product.netto && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Isi / Netto</p>
+                    <p className="font-medium text-foreground">{product.netto}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
+
+        <DrawerFooter className="px-4 pb-4 sm:px-6">
+          <Button
+            type="button"
+            size="lg"
+            className="w-full text-white"
+            style={{ backgroundColor: 'var(--theme-wa)' }}
+            onClick={handleOrder}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--theme-wa-hover)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--theme-wa)')}
+          >
+            <MessageCircle className="mr-2 h-5 w-5" aria-hidden="true" />
+            Pesan via WhatsApp
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
