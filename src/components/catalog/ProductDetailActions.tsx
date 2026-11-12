@@ -5,6 +5,7 @@ import { MessageCircle, ShoppingCart, CheckCircle2, XCircle } from 'lucide-react
 import { Button } from '@/components/ui/button'
 import { QuantitySelector } from '@/components/catalog/QuantitySelector'
 import { formatPrice, buildWhatsAppLink, type CatalogProduct, type CatalogSettings } from '@/lib/supabase'
+import { useCartStore } from '@/lib/cart-store'
 
 interface ProductDetailActionsProps {
   product: CatalogProduct
@@ -17,6 +18,7 @@ export function ProductDetailActions({
 }: ProductDetailActionsProps) {
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
+  const addItem = useCartStore((state) => state.addItem)
   const [sessionId] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = sessionStorage.getItem('npure_session')
@@ -31,6 +33,7 @@ export function ProductDetailActions({
   const totalPrice = (product.current_price || 0) * quantity
 
   const handleOrderWA = () => {
+    // Track analytics
     fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,9 +59,11 @@ Mohon info selengkapnya ya. Terima kasih!`
   }
 
   const handleAddToCart = () => {
+    addItem(product, quantity)
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
 
+    // Track analytics
     fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
