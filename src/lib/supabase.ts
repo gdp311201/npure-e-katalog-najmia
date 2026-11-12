@@ -29,6 +29,8 @@ export interface CatalogProduct {
   key_ingredients: string | null
   image_url_1: string | null
   image_url_2: string | null
+  image_url_3: string | null
+  image_url_4: string | null
   is_featured: boolean
   current_price: number | null
   in_stock: boolean
