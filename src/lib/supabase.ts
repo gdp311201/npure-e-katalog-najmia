@@ -16,6 +16,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
+// ============== TYPES ==============
 export interface CatalogProduct {
   catalog_product_id: string
   product_id: string
@@ -66,6 +67,8 @@ export interface CatalogPromo {
   ends_at: string | null
 }
 
+// ============== DATA ACCESS FUNCTIONS ==============
+
 export async function getCatalogSettings(): Promise<CatalogSettings | null> {
   const { data, error } = await supabase
     .from('catalog_settings')
@@ -95,6 +98,41 @@ export async function getCatalogProducts(): Promise<CatalogProduct[]> {
   return (data || []) as CatalogProduct[]
 }
 
+export async function getProductBySlug(slug: string): Promise<CatalogProduct | null> {
+  const { data, error } = await supabase
+    .from('v_catalog_products')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error fetching product by slug:', error)
+    return null
+  }
+  return data as CatalogProduct | null
+}
+
+export async function getSimilarProducts(
+  variant: string | null,
+  excludeSlug: string,
+  limit: number = 6
+): Promise<CatalogProduct[]> {
+  if (!variant) return []
+
+  const { data, error } = await supabase
+    .from('v_catalog_products')
+    .select('*')
+    .eq('variant', variant)
+    .neq('slug', excludeSlug)
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching similar products:', error)
+    return []
+  }
+  return (data || []) as CatalogProduct[]
+}
+
 export async function getActivePromos(): Promise<CatalogPromo[]> {
   const { data, error } = await supabase
     .from('catalog_promos')
@@ -110,6 +148,8 @@ export async function getActivePromos(): Promise<CatalogPromo[]> {
   }
   return (data || []) as CatalogPromo[]
 }
+
+// ============== ANALYTICS HELPERS ==============
 
 export async function trackProductView(
   productId: string,
@@ -173,6 +213,8 @@ export async function upsertCustomer(
   }
   return data.id
 }
+
+// ============== UTILITY ==============
 
 export function formatPrice(rupiah: number | null): string {
   if (rupiah === null || rupiah === undefined) return '—'
