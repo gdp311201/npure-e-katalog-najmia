@@ -4,6 +4,7 @@ import NextTopLoader from 'nextjs-toploader';
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { CartDrawer } from "@/components/catalog/CartDrawer";
+import { BurgerMenu } from "@/components/catalog/BurgerMenu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,6 +78,7 @@ export default function RootLayout({
           shadow={false}
         />
         {children}
+        <BurgerMenu />
         <CartDrawer />
         <Toaster />
       </body>
