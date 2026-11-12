@@ -1,1 +1,251 @@
-'use client'import { useEffect, useMemo, useState, useCallback } from 'react'import { CatalogHeader } from '@/components/catalog/CatalogHeader'import { CatalogFooter } from '@/components/catalog/CatalogFooter'import { FloatingWhatsApp } from '@/components/catalog/FloatingWhatsApp'import { CatalogFilter, type FilterState } from '@/components/catalog/CatalogFilter'import { ProductCard } from '@/components/catalog/ProductCard'import { ProductDetailDrawer } from '@/components/catalog/ProductDetailDrawer'import { EmptyState } from '@/components/catalog/EmptyState'import { Skeleton } from '@/components/ui/skeleton'import {  getCatalogSettings,  getCatalogProducts,  type CatalogProduct,  type CatalogSettings,} from '@/lib/supabase'const FALLBACK_SETTINGS: CatalogSettings = {  id: 1,  brand_name: 'NPURE E-Katalog by Elsa',  tagline: 'Skincare sehat untuk kulit sehat',  footer_text: 'Dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes',  whatsapp_number: '6281575859792',  whatsapp_default_message:    'Halo Elsa, saya mau tanya produk NPURE yang ada di katalog:',  tiktok_url: 'https://www.tiktok.com/@slvqueengreentea',  instagram_url: null,  shipping_info:    'COD (Cash on Delivery) tersedia untuk area Semarang sepanjang rute Najmia Unnes - Sampangan. Hubungi WhatsApp untuk cek ketersediaan COD ke alamat Anda.',  disclaimer_text:    'Produk resmi NPURE. E-katalog ini dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes untuk memfasilitasi pemesanan via WhatsApp. Bukan toko online resmi NPURE.',  is_active: true,}const NPURE_LOGO_URL = 'https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/logo.png'interface FilterStateLocal {  search: string  variant: string  productType: string  inStockOnly: boolean}const DEFAULT_FILTERS: FilterStateLocal = {  search: '',  variant: 'all',  productType: 'all',  inStockOnly: false,}export default function HomePage() {  const [settings, setSettings] = useState<CatalogSettings | null>(null)  const [products, setProducts] = useState<CatalogProduct[]>([])  const [loading, setLoading] = useState(true)  const [error, setError] = useState<string | null>(null)  const [filters, setFilters] = useState<FilterStateLocal>(DEFAULT_FILTERS)  const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null)  const [drawerOpen, setDrawerOpen] = useState(false)  const [sessionId] = useState(() => {    if (typeof window !== 'undefined') {      const stored = sessionStorage.getItem('npure_session')      if (stored) return stored      const id = `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`      sessionStorage.setItem('npure_session', id)      return id    }    return 'server_session'  })  const loadData = useCallback(async () => {    setLoading(true)    setError(null)    try {      const [settingsData, productsData] = await Promise.all([        getCatalogSettings(),        getCatalogProducts(),      ])      setSettings(settingsData)      setProducts(productsData)    } catch (e) {      console.error(e)      setError('Gagal memuat katalog. Cek koneksi atau konfigurasi Supabase.')    } finally {      setLoading(false)    }  }, [])  useEffect(() => {    loadData()  }, [loadData])  const variants = useMemo(() => {    return Array.from(new Set(products.map((p) => p.variant).filter(Boolean) as string[])).sort()  }, [products])  const productTypes = useMemo(() => {    return Array.from(      new Set(products.map((p) => p.product_type).filter(Boolean) as string[])    ).sort()  }, [products])  const filteredProducts = useMemo(() => {    return products.filter((p) => {      if (filters.search) {        const q = filters.search.toLowerCase()        const matches =          p.name.toLowerCase().includes(q) ||          (p.description?.toLowerCase().includes(q) ?? false) ||          (p.variant?.toLowerCase().includes(q) ?? false) ||          (p.product_type?.toLowerCase().includes(q) ?? false) ||          (p.key_ingredients?.toLowerCase().includes(q) ?? false)        if (!matches) return false      }      if (filters.variant !== 'all' && p.variant !== filters.variant) return false      if (filters.productType !== 'all' && p.product_type !== filters.productType) return false      if (filters.inStockOnly && !p.in_stock) return false      return true    })  }, [products, filters])  const handleOpenDetail = useCallback((p: CatalogProduct) => {    setSelectedProduct(p)    setDrawerOpen(true)  }, [])  if (loading) {    return (      <div className="flex min-h-screen flex-col">        <div className="h-[60px] bg-primary" />        <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">          <div className="space-y-4">            <Skeleton className="h-11 w-full" />            <div className="flex gap-2">              <Skeleton className="h-10 w-[140px]" />              <Skeleton className="h-10 w-[160px]" />              <Skeleton className="h-10 w-[120px]" />            </div>            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">              {Array.from({ length: 8 }).map((_, i) => (                <div key={i} className="space-y-2">                  <Skeleton className="aspect-square w-full" />                  <Skeleton className="h-4 w-3/4" />                  <Skeleton className="h-4 w-1/2" />                </div>              ))}            </div>          </div>        </div>      </div>    )  }  if (error || !settings) {    const s = FALLBACK_SETTINGS    return (      <div className="flex min-h-screen flex-col">        <CatalogHeader          brandName={s.brand_name}          tagline={s.tagline}          tiktokUrl={s.tiktok_url}          logoUrl={NPURE_LOGO_URL}        />        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">          {s.shipping_info && (            <div className="mb-5 rounded-xl border border-border/60 bg-secondary/60 p-3 sm:p-4">              <p className="text-xs font-medium text-secondary-foreground sm:text-sm">                <span className="font-semibold text-primary">Info Pengiriman:</span>{' '}                {s.shipping_info}              </p>            </div>          )}          <EmptyState            waNumber={s.whatsapp_number}            waDefaultMsg={s.whatsapp_default_message}            tiktokUrl={s.tiktok_url}            logoUrl={NPURE_LOGO_URL}          />        </main>        <CatalogFooter          footerText={s.footer_text}          disclaimerText={s.disclaimer_text}          shippingInfo={s.shipping_info}          tiktokUrl={s.tiktok_url}        />        <FloatingWhatsApp          waNumber={s.whatsapp_number}          defaultMsg={s.whatsapp_default_message}        />      </div>    )  }  const showEmptyState = products.length === 0  return (    <div className="flex min-h-screen flex-col">      <CatalogHeader        brandName={settings.brand_name}        tagline={settings.tagline}        tiktokUrl={settings.tiktok_url}        logoUrl={NPURE_LOGO_URL}      />      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">        {settings.shipping_info && (          <div className="mb-5 rounded-xl border border-border/60 bg-secondary/60 p-3 sm:p-4">            <p className="text-xs font-medium text-secondary-foreground sm:text-sm">              <span className="font-semibold text-primary">Info Pengiriman:</span>{' '}              {settings.shipping_info}            </p>          </div>        )}        {showEmptyState ? (          <EmptyState            waNumber={settings.whatsapp_number}            waDefaultMsg={settings.whatsapp_default_message}            tiktokUrl={settings.tiktok_url}            logoUrl={NPURE_LOGO_URL}          />        ) : (          <>            <CatalogFilter              filters={filters}              onChange={setFilters}              variants={variants}              productTypes={productTypes}              totalResults={filteredProducts.length}            />            <div className="mt-5">              {filteredProducts.length === 0 ? (                <div className="rounded-xl border border-dashed border-border bg-card/60 p-8 text-center">                  <p className="text-sm text-muted-foreground">                    Tidak ada produk yang cocok dengan filter. Coba reset filter.                  </p>                </div>              ) : (                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">                  {filteredProducts.map((p) => (                    <ProductCard                      key={p.catalog_product_id}                      product={p}                      waNumber={settings.whatsapp_number}                      waDefaultMsg={settings.whatsapp_default_message}                      sessionId={sessionId}                      onOpenDetail={handleOpenDetail}                    />                  ))}                </div>              )}            </div>          </>        )}      </main>      <CatalogFooter        footerText={settings.footer_text}        disclaimerText={settings.disclaimer_text}        shippingInfo={settings.shipping_info}        tiktokUrl={settings.tiktok_url}      />      <FloatingWhatsApp        waNumber={settings.whatsapp_number}        defaultMsg={settings.whatsapp_default_message}      />      <ProductDetailDrawer        product={selectedProduct}        open={drawerOpen}        onOpenChange={setDrawerOpen}        waNumber={settings.whatsapp_number}        waDefaultMsg={settings.whatsapp_default_message}        sessionId={sessionId}      />    </div>  )}
+'use client'
+
+import { useEffect, useMemo, useState, useCallback } from 'react'
+import { CatalogHeader } from '@/components/catalog/CatalogHeader'
+import { CatalogFooter } from '@/components/catalog/CatalogFooter'
+import { FloatingWhatsApp } from '@/components/catalog/FloatingWhatsApp'
+import { CatalogFilter } from '@/components/catalog/CatalogFilter'
+import { ProductCard } from '@/components/catalog/ProductCard'
+import { EmptyState } from '@/components/catalog/EmptyState'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  getCatalogSettings,
+  getCatalogProducts,
+  type CatalogProduct,
+  type CatalogSettings,
+} from '@/lib/supabase'
+
+const FALLBACK_SETTINGS: CatalogSettings = {
+  id: 1,
+  brand_name: 'NPURE E-Katalog by Elsa',
+  tagline: 'Skincare sehat untuk kulit sehat',
+  footer_text: 'Dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes',
+  whatsapp_number: '6281575859792',
+  whatsapp_default_message:
+    'Halo Elsa, saya mau tanya produk NPURE yang ada di katalog:',
+  tiktok_url: 'https://www.tiktok.com/@slvqueengreentea',
+  instagram_url: null,
+  shipping_info:
+    'COD (Cash on Delivery) tersedia untuk area Semarang sepanjang rute Najmia Unnes - Sampangan. Hubungi WhatsApp untuk cek ketersediaan COD ke alamat Anda.',
+  disclaimer_text:
+    'Produk resmi NPURE. E-katalog ini dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes untuk memfasilitasi pemesanan via WhatsApp. Bukan toko online resmi NPURE.',
+  is_active: true,
+}
+
+const NPURE_LOGO_URL = 'https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/logo.png'
+
+interface FilterStateLocal {
+  search: string
+  variant: string
+  productType: string
+  inStockOnly: boolean
+}
+
+const DEFAULT_FILTERS: FilterStateLocal = {
+  search: '',
+  variant: 'all',
+  productType: 'all',
+  inStockOnly: false,
+}
+
+export default function HomePage() {
+  const [settings, setSettings] = useState<CatalogSettings | null>(null)
+  const [products, setProducts] = useState<CatalogProduct[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [filters, setFilters] = useState<FilterStateLocal>(DEFAULT_FILTERS)
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [settingsData, productsData] = await Promise.all([
+        getCatalogSettings(),
+        getCatalogProducts(),
+      ])
+      setSettings(settingsData)
+      setProducts(productsData)
+    } catch (e) {
+      console.error(e)
+      setError('Gagal memuat katalog. Cek koneksi atau konfigurasi Supabase.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  const variants = useMemo(() => {
+    return Array.from(new Set(products.map((p) => p.variant).filter(Boolean) as string[])).sort()
+  }, [products])
+
+  const productTypes = useMemo(() => {
+    return Array.from(
+      new Set(products.map((p) => p.product_type).filter(Boolean) as string[])
+    ).sort()
+  }, [products])
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      if (filters.search) {
+        const q = filters.search.toLowerCase()
+        const matches =
+          p.name.toLowerCase().includes(q) ||
+          (p.description?.toLowerCase().includes(q) ?? false) ||
+          (p.variant?.toLowerCase().includes(q) ?? false) ||
+          (p.product_type?.toLowerCase().includes(q) ?? false) ||
+          (p.key_ingredients?.toLowerCase().includes(q) ?? false)
+        if (!matches) return false
+      }
+      if (filters.variant !== 'all' && p.variant !== filters.variant) return false
+      if (filters.productType !== 'all' && p.product_type !== filters.productType) return false
+      if (filters.inStockOnly && !p.in_stock) return false
+      return true
+    })
+  }, [products, filters])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <div className="h-[60px] bg-primary" />
+        <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">
+          <div className="space-y-4">
+            <Skeleton className="h-11 w-full" />
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-[140px]" />
+              <Skeleton className="h-10 w-[160px]" />
+              <Skeleton className="h-10 w-[120px]" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="aspect-square w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !settings) {
+    const s = FALLBACK_SETTINGS
+    return (
+      <div className="flex min-h-screen flex-col">
+        <CatalogHeader
+          brandName={s.brand_name}
+          tagline={s.tagline}
+          tiktokUrl={s.tiktok_url}
+          logoUrl={NPURE_LOGO_URL}
+        />
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">
+          {s.shipping_info && (
+            <div className="mb-5 rounded-xl border border-border/60 bg-secondary/60 p-3 sm:p-4">
+              <p className="text-xs font-medium text-secondary-foreground sm:text-sm">
+                <span className="font-semibold text-primary">Info Pengiriman:</span>{' '}
+                {s.shipping_info}
+              </p>
+            </div>
+          )}
+          <EmptyState
+            waNumber={s.whatsapp_number}
+            waDefaultMsg={s.whatsapp_default_message}
+            tiktokUrl={s.tiktok_url}
+            logoUrl={NPURE_LOGO_URL}
+          />
+        </main>
+        <CatalogFooter
+          footerText={s.footer_text}
+          disclaimerText={s.disclaimer_text}
+          shippingInfo={s.shipping_info}
+          tiktokUrl={s.tiktok_url}
+        />
+        <FloatingWhatsApp
+          waNumber={s.whatsapp_number}
+          defaultMsg={s.whatsapp_default_message}
+        />
+      </div>
+    )
+  }
+
+  const showEmptyState = products.length === 0
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <CatalogHeader
+        brandName={settings.brand_name}
+        tagline={settings.tagline}
+        tiktokUrl={settings.tiktok_url}
+        logoUrl={NPURE_LOGO_URL}
+      />
+
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">
+        {settings.shipping_info && (
+          <div className="mb-5 rounded-xl border border-border/60 bg-secondary/60 p-3 sm:p-4">
+            <p className="text-xs font-medium text-secondary-foreground sm:text-sm">
+              <span className="font-semibold text-primary">Info Pengiriman:</span>{' '}
+              {settings.shipping_info}
+            </p>
+          </div>
+        )}
+
+        {showEmptyState ? (
+          <EmptyState
+            waNumber={settings.whatsapp_number}
+            waDefaultMsg={settings.whatsapp_default_message}
+            tiktokUrl={settings.tiktok_url}
+            logoUrl={NPURE_LOGO_URL}
+          />
+        ) : (
+          <>
+            <CatalogFilter
+              filters={filters}
+              onChange={setFilters}
+              variants={variants}
+              productTypes={productTypes}
+              totalResults={filteredProducts.length}
+            />
+
+            <div className="mt-5">
+              {filteredProducts.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border bg-card/60 p-8 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Tidak ada produk yang cocok dengan filter. Coba reset filter.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                  {filteredProducts.map((p) => (
+                    <ProductCard
+                      key={p.catalog_product_id}
+                      product={p}
+                      waNumber={settings.whatsapp_number}
+                      waDefaultMsg={settings.whatsapp_default_message}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </main>
+
+      <CatalogFooter
+        footerText={settings.footer_text}
+        disclaimerText={settings.disclaimer_text}
+        shippingInfo={settings.shipping_info}
+        tiktokUrl={settings.tiktok_url}
+      />
+
+      <FloatingWhatsApp
+        waNumber={settings.whatsapp_number}
+        defaultMsg={settings.whatsapp_default_message}
+      />
+    </div>
+  )
+}
