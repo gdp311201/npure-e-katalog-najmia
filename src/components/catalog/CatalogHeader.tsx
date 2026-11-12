@@ -1,7 +1,9 @@
 'use client'
 
 import Image from 'next/image'
+import { Menu } from 'lucide-react'
 import { CartButton } from '@/components/catalog/CartButton'
+import { useUIStore } from '@/lib/ui-store'
 
 interface CatalogHeaderProps {
   brandName: string
@@ -11,6 +13,8 @@ interface CatalogHeaderProps {
 }
 
 export function CatalogHeader({ brandName, tagline, tiktokUrl, logoUrl }: CatalogHeaderProps) {
+  const openBurger = useUIStore((state) => state.openBurger)
+
   return (
     <header
       className="sticky top-0 z-40 border-b border-emerald-900/30 bg-primary text-primary-foreground shadow-md"
@@ -18,8 +22,16 @@ export function CatalogHeader({ brandName, tagline, tiktokUrl, logoUrl }: Catalo
     >
       <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
         <div className="flex items-center justify-between gap-3">
-          {/* Brand + Logo */}
           <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              type="button"
+              onClick={openBurger}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white transition hover:bg-white/15 active:scale-95"
+              aria-label="Buka menu navigasi"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+
             {logoUrl ? (
               <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-white ring-2 ring-white/30">
                 <Image
@@ -51,7 +63,6 @@ export function CatalogHeader({ brandName, tagline, tiktokUrl, logoUrl }: Catalo
             </div>
           </div>
 
-          {/* Right side: Cart + TikTok */}
           <div className="flex items-center gap-2">
             <CartButton />
 
