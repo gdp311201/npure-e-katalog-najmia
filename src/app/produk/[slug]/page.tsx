@@ -18,7 +18,7 @@ import {
 } from '@/lib/supabase'
 
 const NPURE_LOGO_URL =
-  'https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/logo.png'
+  'https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/NPURE-Logo-White-1.png'
 
 const FALLBACK_SETTINGS: CatalogSettings = {
   id: 1,
