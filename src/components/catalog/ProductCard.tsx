@@ -1,12 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Package } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatPrice, type CatalogProduct } from '@/lib/supabase'
+import {
+  getQuizProfile,
+  getProductMatch,
+  type ProductMatch,
+} from '@/lib/quiz-profile'
 
 interface ProductCardProps {
   product: CatalogProduct
@@ -39,6 +44,16 @@ export function ProductCard({
     }
     return 'server_session'
   })
+
+  // Personalisasi: load quiz profile dari localStorage (client-only,
+  // initial null supaya tidak hydration mismatch).
+  const [match, setMatch] = useState<ProductMatch | null>(null)
+
+  useEffect(() => {
+    const profile = getQuizProfile()
+    if (!profile) return
+    setMatch(getProductMatch(product, profile))
+  }, [product])
 
   const variantClass =
     VARIANT_CHIP_CLASS[product.variant || ''] || 'chip-non-series'
@@ -102,8 +117,8 @@ Mohon info selengkapnya ya. Terima kasih!`
           </div>
         )}
 
-        {/* Stock badge */}
-        <div className="absolute left-2 top-2">
+        {/* Top-left badges: stock + (conditional) match / pregnancy warning */}
+        <div className="absolute left-2 top-2 flex flex-col items-start gap-1">
           {product.in_stock ? (
             <span className="pill-in-stock inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold">
               Tersedia
@@ -111,6 +126,20 @@ Mohon info selengkapnya ya. Terima kasih!`
           ) : (
             <span className="pill-out-of-stock inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold">
               Kosong
+            </span>
+          )}
+
+          {/* Strong match: skin type + concern overlap → badge personal */}
+          {match?.tier === 'strong' && (
+            <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground shadow-sm">
+              ✓ Cocok untukmu
+            </span>
+          )}
+
+          {/* Pregnancy block: user hamil & produk tidak aman → warning */}
+          {match?.isPregnancyBlocked && (
+            <span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-600">
+              ⚠️ Hindari jika hamil
             </span>
           )}
         </div>
