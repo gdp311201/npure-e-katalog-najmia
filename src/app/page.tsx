@@ -35,7 +35,7 @@ const FALLBACK_SETTINGS: CatalogSettings = {
   is_active: true,
 }
 
-const NPURE_LOGO_URL = 'https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/logo.png'
+const NPURE_LOGO_URL = 'https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/NPURE-Logo-White-1.png'
 
 interface FilterStateLocal {
   search: string
