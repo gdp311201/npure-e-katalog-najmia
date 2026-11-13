@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, BadgeCheck, FlaskConical, Ruler } from 'lucide-react'
+import { ChevronLeft, BadgeCheck, FlaskConical, Ruler, AlertTriangle, Sparkles, Info, Wand2 } from 'lucide-react'
 import { CatalogHeader } from '@/components/catalog/CatalogHeader'
 import { CatalogFooter } from '@/components/catalog/CatalogFooter'
 import { FloatingWhatsApp } from '@/components/catalog/FloatingWhatsApp'
@@ -35,6 +35,18 @@ const FALLBACK_SETTINGS: CatalogSettings = {
   disclaimer_text:
     'Produk resmi NPURE. E-katalog ini dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes untuk memfasilitasi pemesanan via WhatsApp. Bukan toko online resmi NPURE.',
   is_active: true,
+}
+
+const SKIN_TYPE_LABELS: Record<string, string> = {
+  oily: 'Berminyak',
+  dry: 'Kering',
+  combination: 'Kombinasi',
+  sensitive: 'Sensitif',
+  'acne-prone': 'Berjerawat',
+  normal: 'Normal',
+  mature: 'Matang',
+  'all-skin-types': 'Semua Jenis Kulit',
+  all: 'Semua Jenis Kulit',
 }
 
 type Props = {
@@ -150,7 +162,25 @@ export default async function ProductPage({ params }: Props) {
                   ★ Featured
                 </Badge>
               )}
+              {product.pregnancy_safe === false && (
+                <Badge variant="outline" className="border-orange-400/50 text-orange-600">
+                  <AlertTriangle className="mr-1 h-3 w-3" />
+                  Hindari jika hamil
+                </Badge>
+              )}
             </div>
+
+            {/* Cocok untuk (skin types) */}
+            {product.skin_types && product.skin_types.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs font-medium text-muted-foreground">Cocok untuk:</span>
+                {product.skin_types.map((st) => (
+                  <Badge key={st} variant="secondary" className="bg-primary/10 text-primary">
+                    {SKIN_TYPE_LABELS[st] || st.replace(/-/g, ' ')}
+                  </Badge>
+                ))}
+              </div>
+            )}
 
             {/* Name */}
             <h1 className="text-xl font-bold leading-tight text-foreground sm:text-2xl">
@@ -185,6 +215,51 @@ export default async function ProductPage({ params }: Props) {
               <Separator className="mb-4" />
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {product.key_ingredients}
+              </p>
+            </section>
+          )}
+
+          {/* Manfaat Utama (key_benefits) */}
+          {product.key_benefits && product.key_benefits.length > 0 && (
+            <section>
+              <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                <Sparkles className="h-4 w-4 text-primary" />
+                Manfaat Utama
+              </h2>
+              <Separator className="mb-4" />
+              <div className="flex flex-wrap gap-2">
+                {product.key_benefits.map((benefit) => (
+                  <Badge key={benefit} variant="outline" className="font-normal capitalize">
+                    {benefit.replace(/-/g, ' ')}
+                  </Badge>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Cara Pakai (how_to_use) */}
+          {product.how_to_use && (
+            <section>
+              <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                <Info className="h-4 w-4 text-primary" />
+                Cara Pakai
+              </h2>
+              <Separator className="mb-4" />
+              <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                {product.how_to_use}
+              </p>
+            </section>
+          )}
+
+          {/* Peringatan (warnings) */}
+          {product.warnings && (
+            <section className="rounded-lg border border-orange-200 bg-orange-50/50 p-4">
+              <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-orange-800">
+                <AlertTriangle className="h-4 w-4" />
+                Peringatan
+              </h2>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-orange-700">
+                {product.warnings}
               </p>
             </section>
           )}
@@ -228,6 +303,29 @@ export default async function ProductPage({ params }: Props) {
             </p>
           </section>
         </div>
+
+        {/* Quiz CTA */}
+        <section className="mt-8 rounded-xl border border-primary/30 bg-primary/5 p-4 sm:p-5">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Wand2 className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">
+                Belum yakin produk ini cocok untuk kulitmu?
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Jawab 5 pertanyaan singkat &amp; dapatkan rutinitas skincare personal
+              </p>
+            </div>
+            <Link
+              href="/quiz"
+              className="shrink-0 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 sm:text-sm"
+            >
+              Mulai Quiz →
+            </Link>
+          </div>
+        </section>
 
         {/* Similar Products */}
         <SimilarProducts products={similar} variant={product.variant} />
