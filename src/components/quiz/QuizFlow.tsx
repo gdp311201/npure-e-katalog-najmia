@@ -91,7 +91,6 @@ export function QuizFlow({ onComplete }: Props) {
     }
     setAnswers(newAnswers);
 
-    // Auto-advance after short delay for single-select
     setTimeout(() => {
       if (isLast) {
         onComplete(newAnswers as QuizAnswers);
@@ -140,26 +139,26 @@ export function QuizFlow({ onComplete }: Props) {
     <div className="space-y-6">
       {/* Progress bar */}
       <div className="space-y-2">
-        <div className="flex justify-between text-sm text-gray-500">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>
             Pertanyaan {currentQ + 1} dari {QUESTIONS.length}
           </span>
           <span>{Math.round(progress)}%</span>
         </div>
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-secondary rounded-full overflow-hidden">
           <div
-            className="h-full bg-green-600 transition-all duration-300"
+            className="h-full bg-primary transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
       {/* Question card */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 space-y-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+      <div className="bg-card rounded-2xl shadow-sm p-6 sm:p-8 space-y-4 border border-border/60">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground">
           {question.title}
         </h2>
-        <p className="text-sm text-gray-500">{question.subtitle}</p>
+        <p className="text-sm text-muted-foreground">{question.subtitle}</p>
 
         {/* Options */}
         <div className="space-y-2 pt-2">
@@ -176,8 +175,8 @@ export function QuizFlow({ onComplete }: Props) {
                     onClick={() => handleSingleSelect(option.value)}
                     className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                       isSelected
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50 hover:bg-secondary/50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -185,17 +184,17 @@ export function QuizFlow({ onComplete }: Props) {
                         <span className="text-2xl">{option.emoji}</span>
                       )}
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900">
+                        <div className="font-medium text-foreground">
                           {option.label}
                         </div>
                         {option.desc && (
-                          <div className="text-xs text-gray-500 mt-0.5">
+                          <div className="text-xs text-muted-foreground mt-0.5">
                             {option.desc}
                           </div>
                         )}
                       </div>
                       {isSelected && (
-                        <span className="text-green-600 text-xl">✓</span>
+                        <span className="text-primary text-xl">✓</span>
                       )}
                     </div>
                   </button>
@@ -211,19 +210,19 @@ export function QuizFlow({ onComplete }: Props) {
                     onClick={() => handleMultiSelect(option.value)}
                     className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
                       isSelected
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50 hover:bg-secondary/50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       {option.emoji && (
                         <span className="text-xl">{option.emoji}</span>
                       )}
-                      <span className="flex-1 font-medium text-gray-900">
+                      <span className="flex-1 font-medium text-foreground">
                         {option.label}
                       </span>
                       {isSelected && (
-                        <span className="text-green-600 text-lg">✓</span>
+                        <span className="text-primary text-lg">✓</span>
                       )}
                     </div>
                   </button>
@@ -233,7 +232,7 @@ export function QuizFlow({ onComplete }: Props) {
 
         {/* Multi-select counter */}
         {question.type === 'multi' && (
-          <p className="text-xs text-gray-400 pt-1">
+          <p className="text-xs text-muted-foreground/70 pt-1">
             Terpilih: {(answers.concerns || []).length}/{question.maxSelect || 3}
           </p>
         )}
@@ -244,7 +243,7 @@ export function QuizFlow({ onComplete }: Props) {
         {currentQ > 0 && (
           <button
             onClick={handleBack}
-            className="flex-1 py-3 rounded-full border-2 border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 py-3 rounded-full border-2 border-border text-muted-foreground font-medium hover:bg-secondary transition-colors"
           >
             ← Kembali
           </button>
@@ -253,7 +252,7 @@ export function QuizFlow({ onComplete }: Props) {
           <button
             onClick={handleNext}
             disabled={!canProceed()}
-            className="flex-1 py-3 rounded-full bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-3 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLast ? 'Lihat Hasil →' : 'Lanjut →'}
           </button>
