@@ -34,26 +34,26 @@ export default function QuizPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
       <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
         {state === 'intro' && (
           <div className="text-center space-y-6">
             <div className="text-6xl">🌿</div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
               Skincare Quiz
             </h1>
-            <p className="text-lg text-gray-600 max-w-md mx-auto">
+            <p className="text-lg text-muted-foreground max-w-md mx-auto">
               Temukan rangkaian skincare N&apos;PURE yang tepat untuk kulitmu
               dalam 5 pertanyaan singkat
             </p>
-            <div className="space-y-2 text-sm text-gray-500">
+            <div className="space-y-2 text-sm text-muted-foreground">
               <p>✨ Personalisasi berdasarkan jenis &amp; masalah kulit</p>
               <p>🛡️ Pertimbangan keamanan untuk ibu hamil</p>
               <p>💰 Sesuai budget kamu</p>
             </div>
             <button
               onClick={handleStart}
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full transition-colors text-lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full transition-colors text-lg"
             >
               Mulai Quiz →
             </button>
@@ -64,11 +64,13 @@ export default function QuizPage() {
 
         {state === 'loading' && (
           <div className="text-center space-y-4 py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-200 border-t-green-600"></div>
-            <p className="text-lg text-gray-600 font-medium">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary"></div>
+            <p className="text-lg text-muted-foreground font-medium">
               Sedang menganalisis kulitmu...
             </p>
-            <p className="text-sm text-gray-400">Mencari produk terbaik untukmu</p>
+            <p className="text-sm text-muted-foreground/70">
+              Mencari produk terbaik untukmu
+            </p>
           </div>
         )}
 
