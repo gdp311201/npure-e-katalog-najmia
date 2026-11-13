@@ -38,6 +38,15 @@ export interface CatalogProduct {
   so_created_at: string
   catalog_created_at: string
   catalog_updated_at: string
+  // Quiz-enriched fields (from skincare_quiz migration)
+  skin_types: string[] | null
+  skin_concerns: string[] | null
+  key_benefits: string[] | null
+  routine_step: string | null
+  pregnancy_safe: boolean | null
+  age_recommendation: string | null
+  how_to_use: string | null
+  warnings: string | null
 }
 
 export interface CatalogSettings {
