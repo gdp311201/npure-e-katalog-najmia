@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { QuizRecommendation } from '@/lib/quiz-recommendation';
 import {
   QuizAnswers,
@@ -8,6 +9,7 @@ import {
   BUDGET_OPTIONS,
   ROUTINE_TYPE_OPTIONS,
 } from '@/lib/quiz-config';
+import { saveQuizProfile } from '@/lib/quiz-profile';
 import { useCartStore } from '@/lib/cart-store';
 
 type Props = {
@@ -18,6 +20,12 @@ type Props = {
 
 export function QuizResults({ recommendation, answers, onRestart }: Props) {
   const addItem = useCartStore((s) => s.addItem);
+
+  // Persist jawaban quiz ke localStorage supaya ProductCard & homepage
+  // bisa personalisasi saat user balik ke katalog.
+  useEffect(() => {
+    saveQuizProfile(answers);
+  }, [answers]);
 
   const skinTypeLabel =
     SKIN_TYPE_OPTIONS.find((t) => t.value === answers.skinType)?.label ||
