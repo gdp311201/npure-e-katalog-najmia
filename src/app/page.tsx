@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { CatalogHeader } from '@/components/catalog/CatalogHeader'
 import { CatalogFooter } from '@/components/catalog/CatalogFooter'
@@ -100,7 +101,7 @@ export default function HomePage() {
         if (!matches) return false
       }
       if (filters.variant !== 'all' && p.variant !== filters.variant) return false
-      if (filters.productType !== 'all' && p.product_type !== filters.productType) return false
+      if (filters.productType !== 'all' && p.productType !== filters.productType) return false
       if (filters.inStockOnly && !p.in_stock) return false
       return true
     })
@@ -192,6 +193,29 @@ export default function HomePage() {
               {settings.shipping_info}
             </p>
           </div>
+        )}
+
+        {/* Quiz CTA banner */}
+        {!showEmptyState && (
+          <Link
+            href="/quiz"
+            className="group mb-5 flex items-center gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4 transition hover:border-primary/50 hover:bg-primary/10 sm:p-5"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-2xl text-primary-foreground">
+              🌿
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground sm:text-base">
+                Bingung pilih skincare yang cocok?
+              </p>
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                Jawab 5 pertanyaan singkat &amp; dapatkan rekomendasi rutinitas personal
+              </p>
+            </div>
+            <span className="shrink-0 text-sm font-medium text-primary transition group-hover:translate-x-0.5">
+              Mulai →
+            </span>
+          </Link>
         )}
 
         {showEmptyState ? (
