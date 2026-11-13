@@ -41,33 +41,33 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="text-4xl">🎉</div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
           Routine Skincare untukmu!
         </h1>
-        <p className="text-gray-500">Berdasarkan jawaban quiz kamu</p>
+        <p className="text-muted-foreground">Berdasarkan jawaban quiz kamu</p>
       </div>
 
       {/* Skin profile summary */}
-      <div className="bg-green-50 rounded-2xl p-4 space-y-2">
-        <div className="text-sm font-semibold text-green-800">
+      <div className="bg-primary/5 rounded-2xl p-4 space-y-2 border border-primary/20">
+        <div className="text-sm font-semibold text-primary">
           Profil Kulitmu:
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
-            <span className="text-gray-500">Jenis:</span>{' '}
-            <span className="font-medium">{skinTypeLabel}</span>
+            <span className="text-muted-foreground">Jenis:</span>{' '}
+            <span className="font-medium text-foreground">{skinTypeLabel}</span>
           </div>
           <div>
-            <span className="text-gray-500">Budget:</span>{' '}
-            <span className="font-medium">{budgetLabel}</span>
+            <span className="text-muted-foreground">Budget:</span>{' '}
+            <span className="font-medium text-foreground">{budgetLabel}</span>
           </div>
           <div className="col-span-2">
-            <span className="text-gray-500">Masalah:</span>{' '}
-            <span className="font-medium">{concernLabels}</span>
+            <span className="text-muted-foreground">Masalah:</span>{' '}
+            <span className="font-medium text-foreground">{concernLabels}</span>
           </div>
           <div>
-            <span className="text-gray-500">Routine:</span>{' '}
-            <span className="font-medium">{routineLabel}</span>
+            <span className="text-muted-foreground">Routine:</span>{' '}
+            <span className="font-medium text-foreground">{routineLabel}</span>
           </div>
           {answers.pregnant && (
             <div className="text-pink-600 font-medium">
@@ -81,10 +81,10 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
       {recommendation.steps.length === 0 ? (
         <div className="text-center py-8 space-y-3">
           <div className="text-4xl">🔍</div>
-          <p className="text-gray-600 font-medium">
+          <p className="text-muted-foreground font-medium">
             Maaf, tidak ada produk yang cocok dengan kriteria kamu.
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground/70">
             Coba ubah jawaban quiz atau perbesar budget.
           </p>
         </div>
@@ -95,7 +95,7 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
               {/* Step header */}
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{step.emoji}</span>
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-foreground">
                   {step.label}
                 </h3>
               </div>
@@ -105,7 +105,7 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                 {step.products.map((product) => (
                   <div
                     key={product.slug}
-                    className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100"
+                    className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border/60"
                   >
                     <div className="flex gap-3 p-3">
                       {/* Image */}
@@ -126,7 +126,7 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                       {/* Product info */}
                       <div className="flex-1 min-w-0 space-y-1">
                         <a href={`/produk/${product.slug}`}>
-                          <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 hover:text-green-600">
+                          <h4 className="font-semibold text-foreground text-sm line-clamp-2 hover:text-primary">
                             {product.name}
                           </h4>
                         </a>
@@ -138,7 +138,7 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                                 .map((benefit) => (
                                   <span
                                     key={benefit}
-                                    className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full"
+                                    className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full"
                                   >
                                     {benefit.replace(/-/g, ' ')}
                                   </span>
@@ -146,7 +146,7 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                             </div>
                           )}
                         <div className="flex items-center justify-between pt-1">
-                          <span className="font-bold text-green-600 text-sm">
+                          <span className="font-bold text-primary text-sm">
                             {formatPrice(product.current_price)}
                           </span>
                           {!product.pregnancy_safe && (
@@ -169,7 +169,7 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                           quantity: 1,
                         })
                       }
-                      className="w-full py-2 bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors"
+                      className="w-full py-2 bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                     >
                       + Keranjang
                     </button>
@@ -199,13 +199,13 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
       <div className="flex gap-3">
         <button
           onClick={onRestart}
-          className="flex-1 py-3 rounded-full border-2 border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+          className="flex-1 py-3 rounded-full border-2 border-border text-muted-foreground font-medium hover:bg-secondary transition-colors"
         >
           ↻ Ulangi Quiz
         </button>
         <a
           href="/"
-          className="flex-1 py-3 rounded-full bg-green-600 text-white font-semibold text-center hover:bg-green-700 transition-colors"
+          className="flex-1 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-center hover:bg-primary/90 transition-colors"
         >
           Lihat Semua Produk
         </a>
