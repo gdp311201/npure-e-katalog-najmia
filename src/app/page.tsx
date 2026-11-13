@@ -15,6 +15,8 @@ import {
   type CatalogProduct,
   type CatalogSettings,
 } from '@/lib/supabase'
+import { getQuizProfile, type QuizProfile } from '@/lib/quiz-profile'
+import { SKIN_TYPE_OPTIONS, SKIN_CONCERN_OPTIONS } from '@/lib/quiz-config'
 
 const FALLBACK_SETTINGS: CatalogSettings = {
   id: 1,
@@ -55,6 +57,25 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<FilterStateLocal>(DEFAULT_FILTERS)
+
+  // Quiz profile untuk personalisasi banner (client-only, null initial).
+  const [profile, setProfile] = useState<QuizProfile | null>(null)
+
+  useEffect(() => {
+    setProfile(getQuizProfile())
+  }, [])
+
+  const profileSkinLabel = profile
+    ? SKIN_TYPE_OPTIONS.find((t) => t.value === profile.skinType)?.label ||
+      profile.skinType
+    : ''
+  const profileConcernLabels = profile
+    ? profile.concerns
+        .map(
+          (c) => SKIN_CONCERN_OPTIONS.find((o) => o.value === c)?.label || c
+        )
+        .join(', ')
+    : ''
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -195,27 +216,51 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Quiz CTA banner */}
+        {/* Quiz CTA banner — personalisasi kalau profile sudah ada */}
         {!showEmptyState && (
-          <Link
-            href="/quiz"
-            className="group mb-5 flex items-center gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4 transition hover:border-primary/50 hover:bg-primary/10 sm:p-5"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-2xl text-primary-foreground">
-              🌿
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground sm:text-base">
-                Bingung pilih skincare yang cocok?
-              </p>
-              <p className="text-xs text-muted-foreground sm:text-sm">
-                Jawab 5 pertanyaan singkat &amp; dapatkan rekomendasi rutinitas personal
-              </p>
-            </div>
-            <span className="shrink-0 text-sm font-medium text-primary transition group-hover:translate-x-0.5">
-              Mulai →
-            </span>
-          </Link>
+          profile ? (
+            <Link
+              href="/quiz"
+              className="group mb-5 flex items-center gap-4 rounded-xl border border-primary/40 bg-primary/10 p-4 transition hover:border-primary/60 hover:bg-primary/15 sm:p-5"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-2xl text-primary-foreground">
+                🎯
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground sm:text-base">
+                  Skincare profile-mu sudah aktif
+                </p>
+                <p className="text-xs text-muted-foreground sm:text-sm">
+                  Kulit {profileSkinLabel}
+                  {profileConcernLabels && ` • ${profileConcernLabels}`}
+                  . Cari produk berbadge <span className="font-semibold text-primary">✓ Cocok</span> di bawah.
+                </p>
+              </div>
+              <span className="shrink-0 text-sm font-medium text-primary transition group-hover:translate-x-0.5">
+                Perbarui →
+              </span>
+            </Link>
+          ) : (
+            <Link
+              href="/quiz"
+              className="group mb-5 flex items-center gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4 transition hover:border-primary/50 hover:bg-primary/10 sm:p-5"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-2xl text-primary-foreground">
+                🌿
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground sm:text-base">
+                  Bingung pilih skincare yang cocok?
+                </p>
+                <p className="text-xs text-muted-foreground sm:text-sm">
+                  Jawab 5 pertanyaan singkat &amp; dapatkan rekomendasi rutinitas personal
+                </p>
+              </div>
+              <span className="shrink-0 text-sm font-medium text-primary transition group-hover:translate-x-0.5">
+                Mulai →
+              </span>
+            </Link>
+          )
         )}
 
         {showEmptyState ? (
