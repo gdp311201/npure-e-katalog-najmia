@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { CatalogHeader } from '@/components/catalog/CatalogHeader'
 import { CatalogFooter } from '@/components/catalog/CatalogFooter'
-import { FloatingWhatsApp } from '@/components/catalog/FloatingWhatsApp'
+import { FloatingActions } from '@/components/catalog/FloatingActions'
 import { CatalogFilter } from '@/components/catalog/CatalogFilter'
 import { ProductCard } from '@/components/catalog/ProductCard'
 import { EmptyState } from '@/components/catalog/EmptyState'
@@ -187,9 +187,10 @@ export default function HomePage() {
           shippingInfo={s.shipping_info}
           tiktokUrl={s.tiktok_url}
         />
-        <FloatingWhatsApp
+        <FloatingActions
           waNumber={s.whatsapp_number}
           defaultMsg={s.whatsapp_default_message}
+          tiktokUrl={s.tiktok_url}
         />
       </div>
     )
@@ -311,10 +312,11 @@ export default function HomePage() {
         tiktokUrl={settings.tiktok_url}
       />
 
-      <FloatingWhatsApp
-        waNumber={settings.whatsapp_number}
-        defaultMsg={settings.whatsapp_default_message}
-      />
+        <FloatingActions
+          waNumber={s.whatsapp_number}
+          defaultMsg={s.whatsapp_default_message}
+          tiktokUrl={s.tiktok_url}
+        />
     </div>
   )
 }
