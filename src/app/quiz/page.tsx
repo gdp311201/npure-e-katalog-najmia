@@ -1,13 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { CatalogHeader } from '@/components/catalog/CatalogHeader';
+import { FloatingActions } from '@/components/catalog/FloatingActions';
 import { QuizAnswers } from '@/lib/quiz-config';
 import {
   getQuizRecommendations,
   QuizRecommendation,
 } from '@/lib/quiz-recommendation';
-import { QuizFlow } from '@/components/quiz/QuizFlow';
-import { QuizResults } from '@/components/quiz/QuizResults';
+import {
+  getCatalogSettings,
+  type CatalogSettings,
+} from '@/lib/supabase';
+
+const NPURE_LOGO_URL =
+  'https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/NPURE-Logo-White-1.png';
+
+const FALLBACK_SETTINGS: CatalogSettings = {
+  id: 1,
+  brand_name: 'NPURE E-Katalog by Elsa',
+  tagline: 'Skincare sehat untuk kulit sehat',
+  footer_text: 'Dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes',
+  whatsapp_number: '6281575859792',
+  whatsapp_default_message:
+    'Halo Elsa, saya mau tanya produk NPURE yang ada di katalog:',
+  tiktok_url: 'https://www.tiktok.com/@slvqueengreentea',
+  instagram_url: null,
+  shipping_info: null,
+  disclaimer_text:
+    'Produk resmi NPURE. E-katalog ini dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes.',
+  is_active: true,
+};
 
 type QuizPageState = 'intro' | 'quiz' | 'loading' | 'results';
 
@@ -16,6 +39,13 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<QuizAnswers | null>(null);
   const [recommendation, setRecommendation] =
     useState<QuizRecommendation | null>(null);
+  const [settings, setSettings] = useState<CatalogSettings>(FALLBACK_SETTINGS);
+
+  useEffect(() => {
+    getCatalogSettings().then((s) => {
+      if (s) setSettings(s);
+    });
+  }, []);
 
   const handleStart = () => setState('quiz');
 
@@ -34,8 +64,15 @@ export default function QuizPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
-      <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-primary/5 to-background">
+      <CatalogHeader
+        brandName={settings.brand_name}
+        tagline={settings.tagline}
+        tiktokUrl={settings.tiktok_url}
+        logoUrl={NPURE_LOGO_URL}
+      />
+
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:py-12">
         {state === 'intro' && (
           <div className="text-center space-y-6">
             <div className="text-6xl">🌿</div>
@@ -81,7 +118,13 @@ export default function QuizPage() {
             onRestart={handleRestart}
           />
         )}
-      </div>
+      </main>
+
+      <FloatingActions
+        waNumber={settings.whatsapp_number}
+        defaultMsg={settings.whatsapp_default_message}
+        tiktokUrl={settings.tiktok_url}
+      />
     </div>
   );
 }
