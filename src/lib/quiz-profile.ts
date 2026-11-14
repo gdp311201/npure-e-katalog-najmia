@@ -13,10 +13,8 @@ export type MatchTier = 'strong' | 'weak' | 'none'
 
 export type ProductMatch = {
   tier: MatchTier
-  isPregnancyBlocked: boolean
 }
 
-/** Simpan jawaban quiz ke localStorage agar persist antar session. */
 export function saveQuizProfile(answers: QuizAnswers): void {
   if (typeof window === 'undefined') return
   const profile: QuizProfile = {
@@ -31,7 +29,6 @@ export function saveQuizProfile(answers: QuizAnswers): void {
   }
 }
 
-/** Ambil profile quiz dari localStorage (null kalau belum pernah / invalid). */
 export function getQuizProfile(): QuizProfile | null {
   if (typeof window === 'undefined') return null
   try {
@@ -46,7 +43,6 @@ export function getQuizProfile(): QuizProfile | null {
   }
 }
 
-/** Hapus profile quiz (kalau user mau reset). */
 export function clearQuizProfile(): void {
   if (typeof window === 'undefined') return
   try {
@@ -56,27 +52,13 @@ export function clearQuizProfile(): void {
   }
 }
 
-/**
- * Hitung seberapa cocok produk dengan profile user.
- * - 'strong': skin type match AND concern overlap → badge "Cocok untukmu"
- * - 'weak': salah satu match → no badge (biar gak spam)
- * - 'none': no match
- * Pregnancy block selalu return 'none' + flag, supaya card bisa tampilin warning.
- */
 export function getProductMatch(
   product: Pick<
     CatalogProduct,
-    'skin_types' | 'skin_concerns' | 'pregnancy_safe'
+    'skin_types' | 'skin_concerns'
   >,
   profile: QuizProfile
 ): ProductMatch {
-  const isPregnancyBlocked =
-    profile.pregnant === true && product.pregnancy_safe === false
-
-  if (isPregnancyBlocked) {
-    return { tier: 'none', isPregnancyBlocked: true }
-  }
-
   const types = product.skin_types || []
   const skinTypeMatch =
     types.includes(profile.skinType) ||
@@ -89,10 +71,10 @@ export function getProductMatch(
   )
 
   if (skinTypeMatch && concernMatch) {
-    return { tier: 'strong', isPregnancyBlocked: false }
+    return { tier: 'strong' }
   }
   if (skinTypeMatch || concernMatch) {
-    return { tier: 'weak', isPregnancyBlocked: false }
+    return { tier: 'weak' }
   }
-  return { tier: 'none', isPregnancyBlocked: false }
+  return { tier: 'none' }
 }
