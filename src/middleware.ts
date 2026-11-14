@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Paths yang gak butuh auth (bisa diakses tanpa login)
-const PUBLIC_PATHS = ['/admin/login', '/api/admin/setup', '/api/admin/login']
+const PUBLIC_PATHS = [
+  '/admin/login',
+  '/admin/setup',
+  '/api/admin/setup',
+  '/api/admin/login',
+]
 
 const COOKIE_NAME = 'npure_admin_token'
 
