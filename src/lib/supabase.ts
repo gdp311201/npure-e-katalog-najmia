@@ -49,6 +49,7 @@ export interface CatalogProduct {
   age_recommendation: string | null
   how_to_use: string | null
   warnings: string | null
+  compare_at_price: number | null
 }
 
 export interface CatalogSettings {
