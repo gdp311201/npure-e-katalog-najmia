@@ -254,7 +254,7 @@ export default function HomePage() {
                   Bingung pilih skincare yang cocok?
                 </p>
                 <p className="text-xs text-muted-foreground sm:text-sm">
-                  Jawab 5 pertanyaan singkat &amp; dapatkan rekomendasi rutinitas personal
+                  Jawab 4 pertanyaan singkat &amp; dapatkan rekomendasi rutinitas personal
                 </p>
               </div>
               <span className="shrink-0 text-sm font-medium text-primary transition group-hover:translate-x-0.5">
