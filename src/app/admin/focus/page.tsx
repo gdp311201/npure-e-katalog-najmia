@@ -1,7 +1,15 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Target, Plus, Trash2, ChevronLeft, ChevronRight, AlertCircle, X } from 'lucide-react'
+import {
+  Target,
+  Plus,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  X,
+} from 'lucide-react'
 import Image from 'next/image'
 
 type FocusItem = {
@@ -34,12 +42,14 @@ export default function FocusPage() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   })
 
-  // Add form — search-as-you-type instead of pure dropdown
+  // Add form — search-as-you-type
   const [query, setQuery] = useState('')
   const [matches, setMatches] = useState<CatalogProduct[]>([])
   const [highlight, setHighlight] = useState(0)
   const [selectedSlug, setSelectedSlug] = useState('')
-  const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null)
+  const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(
+    null
+  )
   const [displayLabel, setDisplayLabel] = useState('')
 
   const fetchFocus = useCallback(async () => {
@@ -64,18 +74,10 @@ export default function FocusPage() {
       if (res.ok) {
         setProducts(data.data || [])
       }
-    } search-as-you-type
-      .filter((p) => {
-        const q = query.trim().toLowerCase()
-        if (!q) return false
-        const matchesName = p.name.toLowerCase().includes(q)
-        const matchesVariant = p.variant?.toLowerCase().includes(q) ?? false
-        return matchesName || matchesVariant
-      })
-      .slice(0, 8)
-    setMatches(filtered)
-    setHighlight(0)
-  }, [query, products])
+    } catch (e) {
+      console.error('Fetch products error:', e)
+    }
+  }, [])
 
   useEffect(() => {
     fetchFocus()
@@ -159,7 +161,9 @@ export default function FocusPage() {
   }
 
   const handleDelete = async (item: FocusItem) => {
-    if (!confirm(`Hapus "${item.product_slug}" dari produk fokus ${selectedMonth}?`))
+    if (
+      !confirm(`Hapus "${item.product_slug}" dari produk fokus ${selectedMonth}?`)
+    )
       return
     try {
       await fetch(`/api/admin/focus/${item.id}`, { method: 'DELETE' })
@@ -173,16 +177,19 @@ export default function FocusPage() {
     const [year, month] = selectedMonth.split('-').map(Number)
     const date = new Date(year, month - 1, 1)
     date.setMonth(date.getMonth() + (direction === 'next' ? 1 : -1))
-    const newMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    const newMonth = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, '0')}`
     setSelectedMonth(newMonth)
   }
 
-  const monthLabel = new Date(selectedMonth + '-01').toLocaleDateString('id-ID', {
-    month: 'long',
-    year: 'numeric',
-  })
+  const monthLabel = new Date(selectedMonth + '-01').toLocaleDateString(
+    'id-ID',
+    { month: 'long', year: 'numeric' }
+  )
 
-  const isCurrentMonth = selectedMonth === new Date().toISOString().slice(0, 7)
+  const isCurrentMonth =
+    selectedMonth === new Date().toISOString().slice(0, 7)
 
   return (
     <div className="space-y-4">
@@ -192,7 +199,8 @@ export default function FocusPage() {
           Produk Fokus
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Set produk highlight tiap bulan. Maksimal 3 produk. Muncul di atas grid katalog.
+          Set produk highlight tiap bulan. Maksimal 3 produk. Muncul di atas grid
+          katalog.
         </p>
       </div>
 
@@ -213,7 +221,7 @@ export default function FocusPage() {
         <button
           onClick={() => navigateMonth('next')}
           className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-secondary"
-        </panel>
+        >
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -358,8 +366,8 @@ export default function FocusPage() {
       ) : (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-700">
-            Sudah mencapai maksimal 3 produk fokus untuk {monthLabel}.
-            Hapus salah satu untuk menambah produk lain.
+            Sudah mencapai maksimal 3 produk fokus untuk {monthLabel}. Hapus
+            salah satu untuk menambah produk lain.
           </p>
         </div>
       )}
@@ -384,7 +392,9 @@ export default function FocusPage() {
         ) : (
           <div className="space-y-2">
             {focusItems.map((item, index) => {
-              const product = products.find((p) => p.slug === item.product_slug)
+              const product = products.find(
+                (p) => p.slug === item.product_slug
+              )
               return (
                 <div
                   key={item.id}
