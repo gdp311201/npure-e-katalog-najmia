@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Target, Plus, Trash2, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
+import { Target, Plus, Trash2, ChevronLeft, ChevronRight, AlertCircle, X } from 'lucide-react'
 import Image from 'next/image'
 
 type FocusItem = {
@@ -16,8 +16,7 @@ type FocusItem = {
 type CatalogProduct = {
   slug: string
   name: string
-  image_url_1: string | null
-  current_price: number
+  image_url_1: string
   variant: string | null
 }
 
@@ -35,8 +34,12 @@ export default function FocusPage() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   })
 
-  // Add form
+  // Add form — search-as-you-type instead of pure dropdown
+  const [query, setQuery] = useState('')
+  const [matches, setMatches] = useState<CatalogProduct[]>([])
+  const [highlight, setHighlight] = useState(0)
   const [selectedSlug, setSelectedSlug] = useState('')
+  const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null)
   const [displayLabel, setDisplayLabel] = useState('')
 
   const fetchFocus = useCallback(async () => {
@@ -56,16 +59,23 @@ export default function FocusPage() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      // Fetch all visible catalog products for the dropdown
       const res = await fetch('/api/admin/products')
       const data = await res.json()
       if (res.ok) {
         setProducts(data.data || [])
       }
-    } catch (e) {
-      console.error('Fetch products error:', e)
-    }
-  }, [])
+    } search-as-you-type
+      .filter((p) => {
+        const q = query.trim().toLowerCase()
+        if (!q) return false
+        const matchesName = p.name.toLowerCase().includes(q)
+        const matchesVariant = p.variant?.toLowerCase().includes(q) ?? false
+        return matchesName || matchesVariant
+      })
+      .slice(0, 8)
+    setMatches(filtered)
+    setHighlight(0)
+  }, [query, products])
 
   useEffect(() => {
     fetchFocus()
@@ -75,13 +85,46 @@ export default function FocusPage() {
     fetchProducts()
   }, [fetchProducts])
 
+  // Compute matches whenever query or products change
+  useEffect(() => {
+    if (!query.trim()) {
+      setMatches([])
+      return
+    }
+    const q = query.trim().toLowerCase()
+    const filtered = products
+      .filter((p) => {
+        const matchesName = p.name.toLowerCase().includes(q)
+        const matchesVariant = p.variant?.toLowerCase().includes(q) ?? false
+        return matchesName || matchesVariant
+      })
+      .slice(0, 8)
+    setMatches(filtered)
+    setHighlight(0)
+  }, [query, products])
+
+  const selectProduct = (p: CatalogProduct) => {
+    setSelectedSlug(p.slug)
+    setSelectedProduct(p)
+    setQuery(p.name)
+    setMatches([])
+    setError('')
+  }
+
+  const clearSelection = () => {
+    setQuery('')
+    setSelectedSlug('')
+    setSelectedProduct(null)
+    setMatches([])
+  }
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSuccess('')
 
-    if (!selectedSlug) {
-      setError('Pilih produk dulu')
+    if (!selectedSlug || !selectedProduct) {
+      setError('Pilih produk dari saran yang muncul')
       return
     }
 
@@ -105,7 +148,7 @@ export default function FocusPage() {
       }
 
       setSuccess('Produk fokus ditambahkan!')
-      setSelectedSlug('')
+      clearSelection()
       setDisplayLabel('')
       fetchFocus()
     } catch {
@@ -116,7 +159,8 @@ export default function FocusPage() {
   }
 
   const handleDelete = async (item: FocusItem) => {
-    if (!confirm(`Hapus ${item.product_slug} dari produk fokus ${selectedMonth}?`)) return
+    if (!confirm(`Hapus "${item.product_slug}" dari produk fokus ${selectedMonth}?`))
+      return
     try {
       await fetch(`/api/admin/focus/${item.id}`, { method: 'DELETE' })
       setFocusItems((prev) => prev.filter((i) => i.id !== item.id))
@@ -139,11 +183,6 @@ export default function FocusPage() {
   })
 
   const isCurrentMonth = selectedMonth === new Date().toISOString().slice(0, 7)
-
-  // Filter out products already in focus
-  const availableProducts = products.filter(
-    (p) => !focusItems.some((f) => f.product_slug === p.slug)
-  )
 
   return (
     <div className="space-y-4">
@@ -174,7 +213,7 @@ export default function FocusPage() {
         <button
           onClick={() => navigateMonth('next')}
           className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-secondary"
-        >
+        </panel>
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -202,25 +241,95 @@ export default function FocusPage() {
             </div>
           )}
 
+          {/* Search-as-you-type product selector */}
           <div>
             <label className="mb-1 block text-xs font-medium text-muted-foreground">
-              Produk
+              Produk (ketik nama untuk cari)
             </label>
-            <select
-              value={selectedSlug}
-              onChange={(e) => {
-                setSelectedSlug(e.target.value)
-                setError('')
-              }}
-              className="h-11 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">— Pilih produk —</option>
-              {availableProducts.map((p) => (
-                <option key={p.slug} value={p.slug}>
-                  {p.name} ({p.variant})
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value)
+                  setSelectedSlug('')
+                  setSelectedProduct(null)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault()
+                    setHighlight((h) => Math.min(h + 1, matches.length - 1))
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault()
+                    setHighlight((h) => Math.max(h - 1, 0))
+                  } else if (e.key === 'Enter' && matches[highlight]) {
+                    e.preventDefault()
+                    selectProduct(matches[highlight])
+                  } else if (e.key === 'Escape') {
+                    setMatches([])
+                  }
+                }}
+                placeholder="Contoh: Cica Clear Pad, Licorice Toner…"
+                className="h-11 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                autoComplete="off"
+              />
+
+              {/* Clear button */}
+              {query && (
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  aria-label="Clear"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+
+              {/* Suggestions dropdown */}
+              {matches.length > 0 && !selectedProduct && (
+                <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-white py-1 shadow-lg">
+                  {matches.map((p, idx) => (
+                    <li key={p.slug}>
+                      <button
+                        type="button"
+                        onClick={() => selectProduct(p)}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs ${
+                          idx === highlight
+                            ? 'bg-secondary/60'
+                            : 'hover:bg-secondary/40'
+                        }`}
+                      >
+                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-secondary">
+                          <Image
+                            src={p.image_url_1}
+                            alt={p.name}
+                            fill
+                            sizes="32px"
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-foreground">
+                            {p.name}
+                          </p>
+                          {p.variant && (
+                            <p className="text-[10px] text-muted-foreground">
+                              {p.variant}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {selectedProduct && (
+              <p className="mt-1.5 text-[11px] text-primary">
+                ✓ Terpilih: <strong>{selectedProduct.name}</strong>
+              </p>
+            )}
           </div>
 
           <div>
@@ -231,7 +340,7 @@ export default function FocusPage() {
               type="text"
               value={displayLabel}
               onChange={(e) => setDisplayLabel(e.target.value)}
-              placeholder={`Default: "Produk Fokus ${monthLabel.split(' ')[0]}"`}
+              placeholder={`Default: "Highlight ${monthLabel.split(' ')[0]}"`}
               className="h-11 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
@@ -249,7 +358,7 @@ export default function FocusPage() {
       ) : (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-700">
-            ⚠️ Sudah mencapai maksimal 3 produk fokus untuk {monthLabel}.
+            Sudah mencapai maksimal 3 produk fokus untuk {monthLabel}.
             Hapus salah satu untuk menambah produk lain.
           </p>
         </div>
