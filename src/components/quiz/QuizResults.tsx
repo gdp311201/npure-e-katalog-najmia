@@ -21,8 +21,6 @@ type Props = {
 export function QuizResults({ recommendation, answers, onRestart }: Props) {
   const addItem = useCartStore((s) => s.addItem);
 
-  // Persist jawaban quiz ke localStorage supaya ProductCard & homepage
-  // bisa personalisasi saat user balik ke katalog.
   useEffect(() => {
     saveQuizProfile(answers);
   }, [answers]);
@@ -73,15 +71,10 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
             <span className="text-muted-foreground">Masalah:</span>{' '}
             <span className="font-medium text-foreground">{concernLabels}</span>
           </div>
-          <div>
+          <div className="col-span-2">
             <span className="text-muted-foreground">Routine:</span>{' '}
             <span className="font-medium text-foreground">{routineLabel}</span>
           </div>
-          {answers.pregnant && (
-            <div className="text-pink-600 font-medium">
-              🤰 Mode ibu hamil aktif
-            </div>
-          )}
         </div>
       </div>
 
@@ -100,7 +93,6 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
         <div className="space-y-6">
           {recommendation.steps.map((step) => (
             <div key={step.step} className="space-y-3">
-              {/* Step header */}
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{step.emoji}</span>
                 <h3 className="text-lg font-bold text-foreground">
@@ -108,7 +100,6 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                 </h3>
               </div>
 
-              {/* Product cards */}
               <div className="space-y-3">
                 {step.products.map((product) => (
                   <div
@@ -116,7 +107,6 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                     className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border/60"
                   >
                     <div className="flex gap-3 p-3">
-                      {/* Image */}
                       {product.image_url_1 && (
                         <a
                           href={`/produk/${product.slug}`}
@@ -131,7 +121,6 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                         </a>
                       )}
 
-                      {/* Product info */}
                       <div className="flex-1 min-w-0 space-y-1">
                         <a href={`/produk/${product.slug}`}>
                           <h4 className="font-semibold text-foreground text-sm line-clamp-2 hover:text-primary">
@@ -157,16 +146,10 @@ export function QuizResults({ recommendation, answers, onRestart }: Props) {
                           <span className="font-bold text-primary text-sm">
                             {formatPrice(product.current_price)}
                           </span>
-                          {!product.pregnancy_safe && (
-                            <span className="text-xs text-orange-500">
-                              ⚠️ Hindari jika hamil
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Add to cart button */}
                     <button
                       onClick={() =>
                         addItem({
