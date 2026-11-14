@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getAdminSupabase } from '@/lib/admin-supabase'
 
-// GET: list ALL catalog products (for admin dropdowns/selectors)
-// Returns slug, name, variant, current_price, image_url_1
-// Includes hidden products (not filtered by is_visible_in_catalog)
+// GET: list visible catalog products (for admin dropdowns/selectors)
+// Only includes products where is_visible_in_catalog = true
 export async function GET() {
   try {
     const supabase = getAdminSupabase()
@@ -13,6 +12,7 @@ export async function GET() {
       .select(
         'slug, product_id, netto, variant, image_url_1, is_visible_in_catalog'
       )
+      .eq('is_visible_in_catalog', true)
       .order('variant', { ascending: true })
       .order('slug', { ascending: true })
 
@@ -21,7 +21,6 @@ export async function GET() {
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    // Fetch product names from products table
     const productIds = data?.map((cp) => cp.product_id) || []
     const { data: products, error: prodError } = await supabase
       .from('products')
@@ -30,7 +29,7 @@ export async function GET() {
 
     if (prodError) {
       console.error('Admin products names error:', prodError.message)
-      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+      return NextResponse.json({ error: 'Database error' }, { status: 22 })
     }
 
     // Merge catalog_products with product names
@@ -42,7 +41,6 @@ export async function GET() {
           name: product?.name || cp.slug,
           variant: cp.variant,
           image_url_1: cp.image_url_1,
-          is_visible_in_catalog: cp.is_visible_in_catalog,
         }
       }) || []
 
