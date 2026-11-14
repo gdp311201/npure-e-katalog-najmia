@@ -56,15 +56,11 @@ export async function getQuizRecommendations(
     'sunscreen',
   ];
 
-  // Step 1: Query all in-stock products with pregnancy + budget filters
+  // Query all in-stock products with budget filter
   let query = supabase
     .from('v_catalog_products')
     .select('*')
     .eq('in_stock', true);
-
-  if (answers.pregnant) {
-    query = query.eq('pregnancy_safe', true);
-  }
 
   if (maxPrice < 999999) {
     query = query.lte('current_price', maxPrice);
@@ -77,7 +73,7 @@ export async function getQuizRecommendations(
     return { answers, steps: [], totalProducts: 0 };
   }
 
-  // Step 2: Filter by skin type in JS (include 'all-skin-types' and 'all')
+  // Filter by skin type in JS (include 'all-skin-types' and 'all')
   const skinTypeMatch = (product: any) => {
     const types = product.skin_types || [];
     return (
@@ -94,7 +90,7 @@ export async function getQuizRecommendations(
     products = data;
   }
 
-  // Step 3: Calculate concern match score for ranking
+  // Calculate concern match score for ranking
   const scored = products.map((p: any) => {
     const productConcerns = p.skin_concerns || [];
     const matchCount = answers.concerns.filter((c) =>
@@ -110,7 +106,7 @@ export async function getQuizRecommendations(
     return (a.current_price || 0) - (b.current_price || 0);
   });
 
-  // Step 4: Group by routine_step
+  // Group by routine_step
   const byStep: Record<string, any[]> = {};
   for (const p of scored) {
     const step = p.routine_step;
@@ -119,7 +115,7 @@ export async function getQuizRecommendations(
     byStep[step].push(p);
   }
 
-  // Step 5: Build recommendations for target steps (top 2 per step)
+  // Build recommendations for target steps (top 2 per step)
   const steps: RoutineStepRecommendation[] = [];
   for (const step of targetSteps) {
     const stepProducts = byStep[step] || [];
