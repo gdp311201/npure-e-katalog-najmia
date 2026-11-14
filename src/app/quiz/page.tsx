@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { CatalogHeader } from '@/components/catalog/CatalogHeader';
 import { FloatingActions } from '@/components/catalog/FloatingActions';
+import { QuizFlow } from '@/components/quiz/QuizFlow';
+import { QuizResults } from '@/components/quiz/QuizResults';
 import { QuizAnswers } from '@/lib/quiz-config';
 import {
   getQuizRecommendations,
