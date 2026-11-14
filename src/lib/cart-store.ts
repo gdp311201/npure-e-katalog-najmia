@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { CatalogProduct } from '@/lib/supabase'
 
 export interface CartItem {
@@ -17,6 +17,7 @@ interface CartState {
   isCartOpen: boolean
   isHydrated: boolean
 
+  // Actions
   addItem: (product: CatalogProduct, quantity: number) => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
@@ -26,8 +27,30 @@ interface CartState {
   closeCart: () => void
   setHydrated: () => void
 
+  // Computed getters
   getTotalItems: () => number
   getTotalPrice: () => number
+}
+
+// No-op storage: dipake kalau localStorage gak tersedia (SSR / sandbox /
+// privacy mode). Cart tetap jalan in-memory, cuma gak persist antar session.
+const noopStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+}
+
+// Factory storage: cek dulu localStorage bisa diakses atau nggak sebelum dipake.
+function safeStorage() {
+  if (typeof window === 'undefined') return noopStorage
+  try {
+    const testKey = '__npure_storage_test__'
+    window.localStorage.setItem(testKey, '1')
+    window.localStorage.removeItem(testKey)
+    return window.localStorage
+  } catch {
+    return noopStorage
+  }
 }
 
 export const useCartStore = create<CartState>()(
@@ -100,6 +123,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'npure-cart',
+      storage: createJSONStorage(safeStorage),
       partialize: (state) => ({ items: state.items }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated()
