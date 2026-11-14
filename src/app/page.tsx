@@ -312,11 +312,11 @@ export default function HomePage() {
         tiktokUrl={settings.tiktok_url}
       />
 
-        <FloatingActions
-          waNumber={s.whatsapp_number}
-          defaultMsg={s.whatsapp_default_message}
-          tiktokUrl={s.tiktok_url}
-        />
+      <FloatingActions
+        waNumber={settings.whatsapp_number}
+        defaultMsg={settings.whatsapp_default_message}
+        tiktokUrl={settings.tiktok_url}
+      />
     </div>
   )
 }
