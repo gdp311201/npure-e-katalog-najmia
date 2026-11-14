@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     const expectedKey = process.env.ADMIN_SETUP_KEY
     if (!expectedKey) {
       return NextResponse.json(
-        { error: 'Setup not configured. Set ADMIN_SETUP_KEY env var.' },
+        { error: 'Setup not configured. Set ADMIN_SETUP_KEY env var in Vercel.' },
         { status: 500 }
       )
     }
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // This throws if SUPABASE_SERVICE_ROLE_KEY missing — surface real error
     const supabase = getAdminSupabase()
 
     // Check if any admin already exists (one-time setup)
@@ -42,14 +43,17 @@ export async function POST(req: NextRequest) {
 
     if (countError) {
       console.error('Setup count error:', countError.message)
-      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+      return NextResponse.json(
+        { error: `Database error: ${countError.message}` },
+        { status: 500 }
+      )
     }
 
     if (count && count > 0) {
       return NextResponse.json(
         {
           error:
-            'Admin user already exists. Setup is one-time only. Use /admin/login instead.',
+            'Admin user already exists. Setup is one-time only. Login at /admin/login instead.',
         },
         { status: 403 }
       )
@@ -65,15 +69,23 @@ export async function POST(req: NextRequest) {
 
     if (insertError) {
       console.error('Setup insert error:', insertError.message)
-      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+      return NextResponse.json(
+        { error: `Database error: ${insertError.message}` },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       ok: true,
-      message: 'Admin user created successfully. You can now login at /admin/login',
+      message: 'Admin user created successfully. Login at /admin/login',
     })
   } catch (e) {
-    console.error('Setup error:', e)
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    // FIXED: surface real error instead of fake ok:true
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    console.error('Setup error:', msg)
+    return NextResponse.json(
+      { error: `Server error: ${msg}` },
+      { status: 500 }
+    )
   }
 }
