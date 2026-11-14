@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminSupabase } from '@/lib/admin-supabase'
 
-// GET: list all visible products with pricing data
+// GET: list visible products with pricing data
+// Query v_catalog_products (sudah filter is_active + is_visible + has image)
+// Jadi cuma produk yang tampil di homepage yang muncul di sini
 export async function GET(req: NextRequest) {
   try {
     const supabase = getAdminSupabase()
@@ -10,13 +12,12 @@ export async function GET(req: NextRequest) {
     const withDiscount = searchParams.get('discount') === 'true'
 
     let query = supabase
-      .from('catalog_products')
+      .from('v_catalog_products')
       .select(
-        'slug, product_id, variant, netto, compare_at_price, is_visible_in_catalog'
+        'slug, name, variant, netto, current_price, compare_at_price, image_url_1'
       )
-      .eq('is_visible_in_catalog', true)
       .order('variant', { ascending: true })
-      .order('slug', { ascending: true })
+      .order('name', { ascending: true })
 
     if (variant && variant !== 'all') {
       query = query.eq('variant', variant)
@@ -32,40 +33,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    // Fetch product names + current price (from view) + image
-    const productIds = data?.map((cp) => cp.product_id) || []
-    const [productsRes, viewRes] = await Promise.all([
-      supabase.from('products').select('id, name').in('id', productIds),
-      supabase
-        .from('v_catalog_products')
-        .select('slug, current_price, image_url_1')
-        .in('slug', data?.map((cp) => cp.slug) || []),
-    ])
-
-    if (productsRes.error || viewRes.error) {
-      console.error('Pricing join error:', productsRes.error?.message, viewRes.error?.message)
-      return NextResponse.json({ error: 'Database error' }, { status: 500 })
-    }
-
-    const merged =
-      data?.map((cp) => {
-        const product = productsRes.data?.find((p) => p.id === cp.product_id)
-        const viewData = viewRes.data?.find((v) => v.slug === cp.slug)
-        return {
-          slug: cp.slug,
-          name: product?.name || cp.slug,
-          variant: cp.variant,
-          netto: cp.netto,
-          image_url_1: viewData?.image_url_1 || null,
-          current_price: viewData?.current_price || 0,
-          compare_at_price: cp.compare_at_price,
-        }
-      }) || []
-
-    return NextResponse.json({ data: merged })
+    return NextResponse.json({ data: data || [] })
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Unknown error'
-    return NextResponse.json({ error: `Server error: ${msg}` }, { status: 500 })
+    return NextResponse.json(
+      { error: `Server error: ${msg}` },
+      { status: 500 }
+    )
   }
 }
 
@@ -90,7 +64,6 @@ export async function PATCH(req: NextRequest) {
     for (const u of updates) {
       if (!u.slug) continue
 
-      // Validate: compare_at_price null (clear) or positive number
       const value =
         u.compare_at_price === null || u.compare_at_price === undefined
           ? null
@@ -120,6 +93,9 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ ok: true, results })
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Unknown error'
-    return NextResponse.json({ error: `Server error: ${msg}` }, { status: 500 })
+    return NextResponse.json(
+      { error: `Server error: ${msg}` },
+      { status: 500 }
+    )
   }
 }
