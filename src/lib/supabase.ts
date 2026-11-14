@@ -40,7 +40,7 @@ export interface CatalogProduct {
   so_created_at: string
   catalog_created_at: string
   catalog_updated_at: string
-  // Quiz-enriched fields (from skincare_quiz migration)
+  // Quiz-enriched fields
   skin_types: string[] | null
   skin_concerns: string[] | null
   key_benefits: string[] | null
@@ -159,71 +159,6 @@ export async function getActivePromos(): Promise<CatalogPromo[]> {
     return []
   }
   return (data || []) as CatalogPromo[]
-}
-
-// ============== ANALYTICS HELPERS ==============
-
-export async function trackProductView(
-  productId: string,
-  sessionId: string,
-  metadata?: { customer_id?: string; user_agent?: string; referrer?: string }
-): Promise<void> {
-  const { error } = await supabase.from('catalog_views').insert({
-    product_id: productId,
-    session_id: sessionId,
-    customer_id: metadata?.customer_id,
-    user_agent: metadata?.user_agent,
-    referrer: metadata?.referrer,
-  })
-  if (error) console.error('Failed to track view:', error.message)
-}
-
-export async function trackInterest(
-  productId: string,
-  sessionId: string,
-  interestType: 'order_click' | 'wa_chat' | 'favorite_added',
-  customerId?: string
-): Promise<void> {
-  const { error } = await supabase.from('catalog_interests').insert({
-    product_id: productId,
-    session_id: sessionId,
-    interest_type: interestType,
-    customer_id: customerId,
-  })
-  if (error) console.error('Failed to track interest:', error.message)
-}
-
-export async function upsertCustomer(
-  name: string,
-  whatsapp: string,
-  sessionId: string,
-  source?: string
-): Promise<string | null> {
-  const { data: existing } = await supabase
-    .from('catalog_customers')
-    .select('id')
-    .eq('whatsapp_number', whatsapp)
-    .maybeSingle()
-
-  if (existing) {
-    return existing.id
-  }
-
-  const { data, error } = await supabase
-    .from('catalog_customers')
-    .insert({
-      name,
-      whatsapp_number: whatsapp,
-      source: source || 'catalog_order',
-    })
-    .select('id')
-    .single()
-
-  if (error) {
-    console.error('Failed to upsert customer:', error.message)
-    return null
-  }
-  return data.id
 }
 
 // ============== UTILITY ==============
