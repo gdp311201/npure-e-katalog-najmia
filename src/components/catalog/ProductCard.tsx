@@ -43,13 +43,10 @@ export function ProductCard({
       sessionStorage.setItem('npure_session', id)
       return id
     } catch {
-      // sessionStorage diblok (sandbox/privacy mode) — fallback in-memory
       return `s_fallback_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
     }
   })
 
-  // Personalisasi: load quiz profile dari localStorage (client-only,
-  // initial null supaya tidak hydration mismatch).
   const [match, setMatch] = useState<ProductMatch | null>(null)
 
   useEffect(() => {
@@ -89,6 +86,18 @@ Mohon info selengkapnya ya. Terima kasih!`
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
+  // Discount calculation
+  const comparePrice = product.compare_at_price
+  const hasDiscount =
+    comparePrice !== null &&
+    comparePrice !== undefined &&
+    comparePrice > (product.current_price ?? 0)
+  const discountPct = hasDiscount
+    ? Math.round(
+        ((comparePrice! - (product.current_price ?? 0)) / comparePrice!) * 100
+      )
+    : 0
+
   return (
     <Card
       role="button"
@@ -120,7 +129,7 @@ Mohon info selengkapnya ya. Terima kasih!`
           </div>
         )}
 
-        {/* Top-left badges: stock + (conditional) match / pregnancy warning */}
+        {/* Top-left badges: stock + match */}
         <div className="absolute left-2 top-2 flex flex-col items-start gap-1">
           {product.in_stock ? (
             <span className="pill-in-stock inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold">
@@ -132,7 +141,6 @@ Mohon info selengkapnya ya. Terima kasih!`
             </span>
           )}
 
-          {/* Strong match: skin type + concern overlap → badge personal */}
           {match?.tier === 'strong' && (
             <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground shadow-sm">
               ✓ Cocok untukmu
@@ -140,9 +148,18 @@ Mohon info selengkapnya ya. Terima kasih!`
           )}
         </div>
 
-        {/* Featured badge */}
-        {product.is_featured && (
+        {/* Top-right: discount badge (kalau ada) */}
+        {hasDiscount && (
           <div className="absolute right-2 top-2">
+            <span className="inline-flex items-center rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+              -{discountPct}%
+            </span>
+          </div>
+        )}
+
+        {/* Featured badge (bottom-right, kalau ada & gak ada discount) */}
+        {product.is_featured && !hasDiscount && (
+          <div className="absolute bottom-2 right-2">
             <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
               ★ Featured
             </span>
@@ -162,15 +179,24 @@ Mohon info selengkapnya ya. Terima kasih!`
         <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground min-h-[2.5rem]">
           {product.name}
         </h3>
-        <div className="flex items-center justify-between gap-2 pt-1">
-          <span className="text-base font-bold text-primary">
-            {formatPrice(product.current_price)}
-          </span>
-          {product.product_type && (
-            <span className="text-[10px] text-muted-foreground">
-              {product.product_type}
+
+        {/* Price with struck compare price */}
+        <div className="flex flex-col gap-0.5 pt-1">
+          {hasDiscount && (
+            <span className="text-[11px] text-muted-foreground line-through">
+              {formatPrice(comparePrice)}
             </span>
           )}
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-base font-bold text-primary">
+              {formatPrice(product.current_price)}
+            </span>
+            {product.product_type && (
+              <span className="text-[10px] text-muted-foreground">
+                {product.product_type}
+              </span>
+            )}
+          </div>
         </div>
 
         <Button
