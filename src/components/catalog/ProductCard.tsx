@@ -35,14 +35,17 @@ export function ProductCard({
 }: ProductCardProps) {
   const router = useRouter()
   const [sessionId] = useState(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window === 'undefined') return 'server_session'
+    try {
       const stored = sessionStorage.getItem('npure_session')
       if (stored) return stored
       const id = `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
       sessionStorage.setItem('npure_session', id)
       return id
+    } catch {
+      // sessionStorage diblok (sandbox/privacy mode) — fallback in-memory
+      return `s_fallback_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
     }
-    return 'server_session'
   })
 
   // Personalisasi: load quiz profile dari localStorage (client-only,
