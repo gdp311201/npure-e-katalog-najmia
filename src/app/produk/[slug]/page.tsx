@@ -162,12 +162,6 @@ export default async function ProductPage({ params }: Props) {
                   ★ Featured
                 </Badge>
               )}
-              {product.pregnancy_safe === false && (
-                <Badge variant="outline" className="border-orange-400/50 text-orange-600">
-                  <AlertTriangle className="mr-1 h-3 w-3" />
-                  Hindari jika hamil
-                </Badge>
-              )}
             </div>
 
             {/* Cocok untuk (skin types) */}
@@ -315,7 +309,7 @@ export default async function ProductPage({ params }: Props) {
                 Belum yakin produk ini cocok untuk kulitmu?
               </p>
               <p className="text-xs text-muted-foreground">
-                Jawab 5 pertanyaan singkat &amp; dapatkan rutinitas skincare personal
+                Jawab 4 pertanyaan singkat &amp; dapatkan rutinitas skincare personal
               </p>
             </div>
             <Link
