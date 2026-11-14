@@ -13,7 +13,7 @@ interface CatalogHeaderProps {
   logoUrl?: string
 }
 
-export function CatalogHeader({ brandName, tagline, tiktokUrl, logoUrl }: CatalogHeaderProps) {
+export function CatalogHeader({ logoUrl }: CatalogHeaderProps) {
   const openBurger = useUIStore((state) => state.openBurger)
 
   return (
@@ -66,28 +66,9 @@ export function CatalogHeader({ brandName, tagline, tiktokUrl, logoUrl }: Catalo
             </Link>
           </div>
 
-          {/* Right side: Cart + TikTok */}
+          {/* Right side: Cart only */}
           <div className="flex items-center gap-2">
             <CartButton />
-
-            {tiktokUrl && (
-              <a
-                href={tiktokUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white/15 px-3 text-xs font-medium ring-1 ring-white/30 transition hover:bg-white/25 active:scale-95"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4 fill-current text-white"
-                  aria-hidden="true"
-                >
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43V9.18a8.27 8.27 0 0 0 4.83 1.54V7.27a4.85 4.85 0 0 1-1.1-.58z" />
-                </svg>
-                <span className="hidden sm:inline text-white">TikTok</span>
-              </a>
-            )}
           </div>
         </div>
       </div>
