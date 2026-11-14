@@ -9,6 +9,7 @@ import { CatalogFilter } from '@/components/catalog/CatalogFilter'
 import { ProductCard } from '@/components/catalog/ProductCard'
 import { EmptyState } from '@/components/catalog/EmptyState'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ProductFocusSection } from '@/components/catalog/ProductFocusSection'
 import {
   getCatalogSettings,
   getCatalogProducts,
@@ -216,6 +217,9 @@ export default function HomePage() {
             </p>
           </div>
         )}
+
+        {/* Product Focus section — monthly highlighted products */}
+        {!showEmptyState && <ProductFocusSection />}
 
         {/* Quiz CTA banner — personalisasi kalau profile sudah ada */}
         {!showEmptyState && (
