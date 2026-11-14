@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ChevronLeft, BadgeCheck, FlaskConical, Ruler, AlertTriangle, Sparkles, Info, Wand2 } from 'lucide-react'
 import { CatalogHeader } from '@/components/catalog/CatalogHeader'
 import { CatalogFooter } from '@/components/catalog/CatalogFooter'
-import { FloatingWhatsApp } from '@/components/catalog/FloatingWhatsApp'
+import { FloatingActions } from '@/components/catalog/FloatingActions'
 import { ProductGallery } from '@/components/catalog/ProductGallery'
 import { ProductDetailActions } from '@/components/catalog/ProductDetailActions'
 import { SimilarProducts } from '@/components/catalog/SimilarProducts'
@@ -338,9 +338,10 @@ export default async function ProductPage({ params }: Props) {
         tiktokUrl={settings.tiktok_url}
       />
 
-      <FloatingWhatsApp
+      <FloatingActions
         waNumber={settings.whatsapp_number}
         defaultMsg={settings.whatsapp_default_message}
+        tiktokUrl={settings.tiktok_url}
       />
     </div>
   )
