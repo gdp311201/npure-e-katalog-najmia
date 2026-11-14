@@ -4,7 +4,6 @@ export type QuizAnswers = {
   skinType: string;
   concerns: string[];
   budget: string;
-  pregnant: boolean;
   routineType: 'minimal' | 'basic' | 'complete';
 };
 
