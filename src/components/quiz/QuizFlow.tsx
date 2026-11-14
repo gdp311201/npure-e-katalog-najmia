@@ -21,7 +21,7 @@ type QuestionOption = {
 };
 
 type Question = {
-  id: keyof QuizAnswers | 'pregnant';
+  id: keyof QuizAnswers;
   title: string;
   subtitle: string;
   type: 'single' | 'multi';
@@ -53,16 +53,6 @@ const QUESTIONS: Question[] = [
     options: BUDGET_OPTIONS,
   },
   {
-    id: 'pregnant',
-    title: 'Apakah kamu sedang hamil atau menyusui?',
-    subtitle: 'Untuk memfilter produk yang aman untuk ibu hamil',
-    type: 'single',
-    options: [
-      { value: 'no', label: 'Tidak', emoji: '🚫' },
-      { value: 'yes', label: 'Ya, sedang hamil/menyusui', emoji: '🤰' },
-    ],
-  },
-  {
     id: 'routineType',
     title: 'Routine skincare seperti apa yang kamu inginkan?',
     subtitle: 'Pilih sesuai waktu dan effort yang bisa kamu luangkan',
@@ -73,9 +63,8 @@ const QUESTIONS: Question[] = [
 
 export function QuizFlow({ onComplete }: Props) {
   const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState<Partial<QuizAnswers> & { pregnant: boolean }>({
+  const [answers, setAnswers] = useState<Partial<QuizAnswers>>({
     concerns: [],
-    pregnant: false,
   });
 
   const question = QUESTIONS[currentQ];
@@ -84,11 +73,7 @@ export function QuizFlow({ onComplete }: Props) {
 
   const handleSingleSelect = (value: string) => {
     const newAnswers = { ...answers };
-    if (question.id === 'pregnant') {
-      newAnswers.pregnant = value === 'yes';
-    } else {
-      (newAnswers as any)[question.id] = value;
-    }
+    (newAnswers as any)[question.id] = value;
     setAnswers(newAnswers);
 
     setTimeout(() => {
@@ -116,7 +101,6 @@ export function QuizFlow({ onComplete }: Props) {
 
   const canProceed = () => {
     if (question.type === 'single') {
-      if (question.id === 'pregnant') return true;
       return !!(answers as any)[question.id];
     }
     return (answers.concerns || []).length > 0;
@@ -164,10 +148,7 @@ export function QuizFlow({ onComplete }: Props) {
         <div className="space-y-2 pt-2">
           {question.type === 'single'
             ? question.options.map((option) => {
-                const isSelected =
-                  question.id === 'pregnant'
-                    ? option.value === 'yes' === answers.pregnant
-                    : (answers as any)[question.id] === option.value;
+                const isSelected = (answers as any)[question.id] === option.value;
 
                 return (
                   <button
