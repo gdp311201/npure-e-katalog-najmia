@@ -83,11 +83,10 @@ export default function QuizPage() {
             </h1>
             <p className="text-lg text-muted-foreground max-w-md mx-auto">
               Temukan rangkaian skincare N&apos;PURE yang tepat untuk kulitmu
-              dalam 5 pertanyaan singkat
+              dalam 4 pertanyaan singkat
             </p>
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>✨ Personalisasi berdasarkan jenis &amp; masalah kulit</p>
-              <p>🛡️ Pertimbangan keamanan untuk ibu hamil</p>
               <p>💰 Sesuai budget kamu</p>
             </div>
             <button
