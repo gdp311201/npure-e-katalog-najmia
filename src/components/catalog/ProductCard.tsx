@@ -138,13 +138,6 @@ Mohon info selengkapnya ya. Terima kasih!`
               ✓ Cocok untukmu
             </span>
           )}
-
-          {/* Pregnancy block: user hamil & produk tidak aman → warning */}
-          {match?.isPregnancyBlocked && (
-            <span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-600">
-              ⚠️ Hindari jika hamil
-            </span>
-          )}
         </div>
 
         {/* Featured badge */}
