@@ -191,9 +191,9 @@ export function buildProductOrderMessage(
   const stockText = inStock ? 'Tersedia' : 'Kosong (pre-order)'
   return `${defaultMsg}
 
-Produk: ${productName}
-Harga: ${price}
-Status stok: ${stockText}
+- Produk: ${productName}
+- Harga: ${price}
+- Status stok: ${stockText}
 
 Mohon info selengkapnya ya. Terima kasih!`
 }
