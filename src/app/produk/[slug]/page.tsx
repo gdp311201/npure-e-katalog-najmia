@@ -25,7 +25,7 @@ const FALLBACK_SETTINGS: CatalogSettings = {
   brand_name: 'NPURE E-Katalog by Elsa',
   tagline: 'Skincare sehat untuk kulit sehat',
   footer_text: 'Dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes',
-  whatsapp_number: '6281575859792',
+  whatsapp_number: '628814166893',
   whatsapp_default_message:
     'Halo Elsa, saya mau tanya produk NPURE yang ada di katalog:',
   tiktok_url: 'https://www.tiktok.com/@slvqueengreentea',
