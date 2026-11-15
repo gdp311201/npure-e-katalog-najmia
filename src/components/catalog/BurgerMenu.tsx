@@ -20,7 +20,7 @@ import { useCartStore } from '@/lib/cart-store'
 const NAJMIA_MAPS_URL =
   'https://www.google.com/maps/place/najmia+unnes/data=!4m2!3m1!1s0x2e708b8bc00d270b:0x5e0100ae268a2cca?sa=X&ved=1t:242&hl=id&ictx=111'
 
-const ELSA_WA_NUMBER = '6281575859792'
+const ELSA_WA_NUMBER = '628814166893'
 
 const RATING_LABELS: Record<number, string> = {
   1: 'Sangat kurang',
