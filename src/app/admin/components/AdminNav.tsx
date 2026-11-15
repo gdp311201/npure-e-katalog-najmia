@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Target,
   Tag,
+  Sparkles,
 } from 'lucide-react'
 import type { TokenPayload } from '@/lib/admin-auth'
 
@@ -35,6 +36,11 @@ export function AdminNav({ user }: AdminNavProps) {
       href: '/admin/focus',
       label: 'Produk Fokus',
       icon: Target,
+    },
+    {
+      href: '/admin/new-release',
+      label: 'New Release',
+      icon: Sparkles,
     },
     {
       href: '/admin/pricing',
