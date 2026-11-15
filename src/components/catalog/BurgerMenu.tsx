@@ -151,7 +151,6 @@ function MenuView({
       label: 'Promo & Diskon',
       href: '/',
       description: 'Penawaran spesial',
-      badge: 'Segera hadir',
     },
   ]
 
