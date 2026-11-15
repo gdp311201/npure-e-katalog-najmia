@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useMemo, useState, useCallback } from 'react'
+import Link from 'next/link'
 import { CatalogHeader } from '@/components/catalog/CatalogHeader'
 import { CatalogFooter } from '@/components/catalog/CatalogFooter'
 import { FloatingActions } from '@/components/catalog/FloatingActions'
@@ -11,7 +11,6 @@ import { EmptyState } from '@/components/catalog/EmptyState'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProductFocusSection } from '@/components/catalog/ProductFocusSection'
 import { NewReleaseSection } from '@/components/catalog/NewReleaseSection'
-import { PromoSection } from '@/components/catalog/PromoSection'
 import {
   getCatalogSettings,
   getCatalogProducts,
@@ -26,7 +25,7 @@ const FALLBACK_SETTINGS: CatalogSettings = {
   brand_name: 'NPURE E-Katalog by Elsa',
   tagline: 'Skincare sehat untuk kulit sehat',
   footer_text: 'Dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes',
-  whatsapp_number: '6281575859792',
+  whatsapp_number: '628814166893',
   whatsapp_default_message:
     'Halo Elsa, saya mau tanya produk NPURE yang ada di katalog:',
   tiktok_url: 'https://www.tiktok.com/@slvqueengreentea',
@@ -45,6 +44,7 @@ interface FilterStateLocal {
   variant: string
   productType: string
   inStockOnly: boolean
+  showPromoOnly: boolean
 }
 
 const DEFAULT_FILTERS: FilterStateLocal = {
@@ -52,6 +52,7 @@ const DEFAULT_FILTERS: FilterStateLocal = {
   variant: 'all',
   productType: 'all',
   inStockOnly: false,
+  showPromoOnly: false,
 }
 
 export default function HomePage() {
@@ -61,7 +62,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<FilterStateLocal>(DEFAULT_FILTERS)
 
-  // Quiz profile untuk personalisasi banner (client-only, null initial).
+  // Quiz profile untuk personalisasi banner (client-only, null initial)
   const [profile, setProfile] = useState<QuizProfile | null>(null)
 
   useEffect(() => {
@@ -74,9 +75,7 @@ export default function HomePage() {
     : ''
   const profileConcernLabels = profile
     ? profile.concerns
-        .map(
-          (c) => SKIN_CONCERN_OPTIONS.find((o) => o.value === c)?.label || c
-        )
+        .map((c) => SKIN_CONCERN_OPTIONS.find((o) => o.value === c)?.label || c)
         .join(', ')
     : ''
 
@@ -125,8 +124,15 @@ export default function HomePage() {
         if (!matches) return false
       }
       if (filters.variant !== 'all' && p.variant !== filters.variant) return false
-      if (filters.productType !== 'all' && p.productType !== filters.productType) return false
+      if (filters.productType !== 'all' && p.product_type !== filters.productType) return false
       if (filters.inStockOnly && !p.in_stock) return false
+      // Promo filter: compare_at_price must exist and be > current_price
+      if (filters.showPromoOnly) {
+        const cp = p.compare_at_price
+        if (cp === null || cp === undefined || cp <= (p.current_price ?? 0)) {
+          return false
+        }
+      }
       return true
     })
   }, [products, filters])
@@ -223,13 +229,10 @@ export default function HomePage() {
         {/* Product Focus section — monthly highlighted products */}
         {!showEmptyState && <ProductFocusSection />}
 
-        {/* New Release section — auto-expiry by date */}
+        {/* New Release section — auto-expiry by date (excludes focus products) */}
         {!showEmptyState && <NewReleaseSection />}
 
-        {/* Promo & Diskon section — products with compare_at_price */}
-        {!showEmptyState && <PromoSection />}
-
-        {/* Quiz CTA banner — personalisasi kalau profile sudah ada */}
+        {/* Quiz CTA banner */}
         {!showEmptyState && (
           profile ? (
             <Link
