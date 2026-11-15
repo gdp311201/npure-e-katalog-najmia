@@ -1,5 +1,8 @@
 'use client'
 
+const NAJMIA_MAPS_URL =
+  'https://www.google.com/maps/place/najmia+unnes/data=!4m2!3m1!1s0x2e708b8bc00d270b:0x5e0100ae268a2cca?sa=X&ved=1t:242&hl=id&ictx=111'
+
 interface CatalogFooterProps {
   footerText: string | null
   disclaimerText: string
@@ -13,7 +16,6 @@ export function CatalogFooter({
   shippingInfo,
   tiktokUrl,
 }: CatalogFooterProps) {
-  // shippingInfo is shown in the top banner (above product grid) — not duplicated here
   return (
     <footer
       className="mt-auto border-t border-emerald-100"
@@ -26,6 +28,21 @@ export function CatalogFooter({
             {footerText && (
               <p className="font-medium text-foreground">{footerText}</p>
             )}
+            {shippingInfo && (
+              <div className="rounded-md border border-emerald-200 bg-white p-2.5">
+                <p className="font-semibold text-primary">Info Pengiriman</p>
+                <p className="mt-0.5 text-muted-foreground">{shippingInfo}</p>
+              </div>
+            )}
+            {/* Maps link */}
+            <a
+              href={NAJMIA_MAPS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+            >
+              📍 Lihat lokasi toko di Google Maps
+            </a>
           </div>
 
           {/* Disclaimer */}
@@ -52,7 +69,8 @@ export function CatalogFooter({
         </div>
 
         <div className="mt-4 border-t border-emerald-100 pt-3 text-[11px] text-muted-foreground">
-          &copy; {new Date().getFullYear()} NPURE E-Katalog. Dibuat untuk BA NPURE Elsa di toko Najmia Unnes.
+          &copy; {new Date().getFullYear()} NPURE E-Katalog. Dibuat untuk BA
+          NPURE Elsa di toko Najmia Unnes.
         </div>
       </div>
     </footer>
