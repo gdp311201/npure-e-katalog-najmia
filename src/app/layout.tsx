@@ -41,12 +41,9 @@ export const metadata: Metadata = {
   appleMobileWebAppCapable: true,
   appleMobileWebAppStatusBarStyle: "default",
   icons: {
-    icon: [
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/icon-192.png", sizes: "192x192" }],
-    shortcut: "/favicon.ico",
+    icon: "https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/icon_apk.png",
+    apple: "https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/icon_apk.png",
+    shortcut: "https://foiteplkbfwwjshykpgj.supabase.co/storage/v1/object/public/npure-assets/icon_apk.png",
   },
   openGraph: {
     title: "NPURE E-Katalog by Elsa",
