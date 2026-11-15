@@ -3,16 +3,40 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
-  X, Home, Sparkles, Tag, MapPin, MessageSquare,
-  ArrowLeft, Send, Store,
+  X,
+  Home,
+  Sparkles,
+  Tag,
+  MapPin,
+  MessageSquare,
+  ArrowLeft,
+  Send,
+  Star,
+  ExternalLink,
 } from 'lucide-react'
 import { useUIStore } from '@/lib/ui-store'
+import { useCartStore } from '@/lib/cart-store'
+
+const NAJMIA_MAPS_URL =
+  'https://www.google.com/maps/place/najmia+unnes/data=!4m2!3m1!1s0x2e708b8bc00d270b:0x5e0100ae268a2cca?sa=X&ved=1t:242&hl=id&ictx=111'
+
+const ELSA_WA_NUMBER = '6281575859792'
+
+const RATING_LABELS: Record<number, string> = {
+  1: 'Sangat kurang',
+  2: 'Kurang',
+  3: 'Cukup',
+  4: 'Puas',
+  5: 'Sangat puas',
+}
 
 export function BurgerMenu() {
   const { isBurgerOpen, closeBurger } = useUIStore()
+  const closeCart = useCartStore((state) => state.closeCart)
   const [view, setView] = useState<'menu' | 'feedback'>('menu')
   const [prevIsOpen, setPrevIsOpen] = useState(isBurgerOpen)
 
+  // Reset to menu view when burger opens
   if (isBurgerOpen !== prevIsOpen) {
     setPrevIsOpen(isBurgerOpen)
     if (isBurgerOpen) {
@@ -20,6 +44,7 @@ export function BurgerMenu() {
     }
   }
 
+  // Lock body scroll
   useEffect(() => {
     if (isBurgerOpen) {
       document.body.style.overflow = 'hidden'
@@ -37,6 +62,7 @@ export function BurgerMenu() {
 
   return (
     <>
+      {/* Overlay */}
       <div
         className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
           isBurgerOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
@@ -45,6 +71,7 @@ export function BurgerMenu() {
         aria-hidden="true"
       />
 
+      {/* Panel — slide from LEFT */}
       <div
         className={`fixed left-0 top-0 z-50 flex h-full w-full max-w-sm flex-col bg-background shadow-2xl transition-transform duration-300 ${
           isBurgerOpen ? 'translate-x-0' : '-translate-x-full'
@@ -53,6 +80,7 @@ export function BurgerMenu() {
         aria-modal="true"
         aria-label="Menu navigasi"
       >
+        {/* Header */}
         <div
           className="flex items-center justify-between border-b border-border px-4 py-3 text-white"
           style={{ backgroundColor: 'var(--theme-primary)' }}
@@ -81,9 +109,13 @@ export function BurgerMenu() {
           </button>
         </div>
 
+        {/* Body */}
         <div className="flex-1 overflow-y-auto">
           {view === 'menu' ? (
-            <MenuView onNavigate={handleNavigate} onFeedback={() => setView('feedback')} />
+            <MenuView
+              onNavigate={handleNavigate}
+              onFeedback={() => setView('feedback')}
+            />
           ) : (
             <FeedbackView onClose={closeBurger} />
           )}
@@ -93,15 +125,40 @@ export function BurgerMenu() {
   )
 }
 
-function MenuView({ onNavigate, onFeedback }: { onNavigate: () => void; onFeedback: () => void }) {
+// ============== Menu View ==============
+function MenuView({
+  onNavigate,
+  onFeedback,
+}: {
+  onNavigate: () => void
+  onFeedback: () => void
+}) {
   const menuItems = [
-    { icon: Home, label: 'Katalog Produk', href: '/', description: 'Lihat semua produk NPURE' },
-    { icon: Sparkles, label: 'New Release', href: '/', description: 'Produk terbaru', badge: 'Segera hadir' },
-    { icon: Tag, label: 'Promo & Diskon', href: '/', description: 'Penawaran spesial', badge: 'Segera hadir' },
+    {
+      icon: Home,
+      label: 'Katalog Produk',
+      href: '/',
+      description: 'Lihat semua produk NPURE',
+    },
+    {
+      icon: Sparkles,
+      label: 'New Release',
+      href: '/',
+      description: 'Produk terbaru',
+      badge: 'Segera hadir',
+    },
+    {
+      icon: Tag,
+      label: 'Promo & Diskon',
+      href: '/',
+      description: 'Penawaran spesial',
+      badge: 'Segera hadir',
+    },
   ]
 
   return (
     <div className="flex flex-col">
+      {/* Menu items */}
       <nav className="py-2">
         {menuItems.map((item, idx) => (
           <Link
@@ -115,18 +172,23 @@ function MenuView({ onNavigate, onFeedback }: { onNavigate: () => void; onFeedba
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-foreground">{item.label}</span>
+                <span className="text-sm font-medium text-foreground">
+                  {item.label}
+                </span>
                 {item.badge && (
                   <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-medium text-amber-800">
                     {item.badge}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">{item.description}</p>
+              <p className="text-xs text-muted-foreground">
+                {item.description}
+              </p>
             </div>
           </Link>
         ))}
 
+        {/* Feedback button */}
         <button
           type="button"
           onClick={onFeedback}
@@ -136,18 +198,26 @@ function MenuView({ onNavigate, onFeedback }: { onNavigate: () => void; onFeedba
             <MessageSquare className="h-5 w-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium text-foreground">Kritik & Saran</span>
-            <p className="text-xs text-muted-foreground">Berikan feedback untuk Elsa</p>
+            <span className="text-sm font-medium text-foreground">
+              Kritik & Saran
+            </span>
+            <p className="text-xs text-muted-foreground">
+              Berikan feedback untuk Elsa
+            </p>
           </div>
         </button>
       </nav>
 
+      {/* Divider */}
       <div className="mx-4 border-t border-border" />
 
+      {/* Outlet & BA Profile */}
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Store className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold text-foreground">Lokasi Outlet & Profil BA</h3>
+          <MapPin className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-semibold text-foreground">
+            Lokasi Outlet & Profil BA
+          </h3>
         </div>
 
         <div className="rounded-lg border border-border bg-secondary/40 p-3 space-y-2">
@@ -159,7 +229,15 @@ function MenuView({ onNavigate, onFeedback }: { onNavigate: () => void; onFeedba
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <MapPin className="h-3 w-3" /> Outlet
             </p>
-            <p className="text-sm font-medium text-foreground">Najmia Unnes, Semarang</p>
+            <a
+              href={NAJMIA_MAPS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Najmia Unnes, Semarang
+              <ExternalLink className="h-3 w-3" />
+            </a>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Pengiriman</p>
@@ -168,12 +246,25 @@ function MenuView({ onNavigate, onFeedback }: { onNavigate: () => void; onFeedba
             </p>
           </div>
           <a
+            href={NAJMIA_MAPS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+          >
+            <MapPin className="h-3.5 w-3.5" />
+            Buka di Google Maps
+          </a>
+          <a
             href="https://www.tiktok.com/@slvqueengreentea"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
           >
-            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-3.5 w-3.5 fill-current"
+              aria-hidden="true"
+            >
               <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43V9.18a8.27 8.27 0 0 0 4.83 1.54V7.27a4.85 4.85 0 0 1-1.1-.58z" />
             </svg>
             @slvqueengreentea
@@ -181,44 +272,84 @@ function MenuView({ onNavigate, onFeedback }: { onNavigate: () => void; onFeedba
         </div>
       </div>
 
+      {/* Disclaimer */}
       <div className="px-4 pb-4">
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Produk resmi NPURE. E-katalog ini dikelola oleh BA NPURE (Elsa) di toko Najmia Unnes untuk memfasilitasi pemesanan via WhatsApp. Bukan toko online resmi NPURE.
+          Produk resmi NPURE. E-katalog ini dikelola oleh BA NPURE (Elsa) di
+          toko Najmia Unnes untuk memfasilitasi pemesanan via WhatsApp. Bukan
+          toko online resmi NPURE.
         </p>
       </div>
     </div>
   )
 }
 
+// ============== Feedback View ==============
 function FeedbackView({ onClose }: { onClose: () => void }) {
   const [type, setType] = useState<'kritik' | 'saran' | 'pertanyaan'>('saran')
+  const [rating, setRating] = useState(5)
+  const [hoverRating, setHoverRating] = useState(0)
   const [name, setName] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [lastSubmission, setLastSubmission] = useState<{
+    type: string
+    rating: number
+    name: string
+    message: string
+  } | null>(null)
 
   const handleSubmit = async () => {
     setError('')
-    if (!name.trim()) { setError('Nama wajib diisi'); return }
-    if (!message.trim()) { setError('Pesan wajib diisi'); return }
+
+    if (!name.trim()) {
+      setError('Nama wajib diisi')
+      return
+    }
+    if (!message.trim()) {
+      setError('Pesan wajib diisi')
+      return
+    }
 
     setSubmitting(true)
+
     try {
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, name, whatsapp, message }),
+        body: JSON.stringify({ type, rating, name, whatsapp, message }),
       })
-      if (!res.ok) throw new Error('Gagal mengirim feedback')
+
+      if (!res.ok) {
+        throw new Error('Gagal mengirim feedback')
+      }
+
+      setLastSubmission({ type, rating, name: name.trim(), message: message.trim() })
       setSubmitted(true)
-      setName(''); setWhatsapp(''); setMessage('')
+      setName('')
+      setWhatsapp('')
+      setMessage('')
+      setRating(5)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Terjadi kesalahan')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const buildWaNotifyLink = () => {
+    if (!lastSubmission) return '#'
+    const msg = `Feedback baru dari ${lastSubmission.name}
+
+Jenis: ${lastSubmission.type}
+Rating: ${lastSubmission.rating}/5 bintang (${RATING_LABELS[lastSubmission.rating] || ''})
+Pesan: ${lastSubmission.message}
+
+(Dikirim dari NPURE E-Katalog)`
+    return `https://wa.me/${ELSA_WA_NUMBER}?text=${encodeURIComponent(msg)}`
   }
 
   if (submitted) {
@@ -228,15 +359,36 @@ function FeedbackView({ onClose }: { onClose: () => void }) {
           <Send className="h-8 w-8" />
         </div>
         <div>
-          <p className="text-base font-medium text-foreground">Terima kasih!</p>
+          <p className="text-base font-medium text-foreground">
+            Terima kasih!
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Feedback Anda telah terkirim. Elsa sangat menghargai masukan Anda.
+            Feedback Anda telah tersimpan. Elsa sangat menghargai masukan Anda.
           </p>
         </div>
+
+        {/* Optional WA notification to Elsa */}
+        <a
+          href={buildWaNotifyLink()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
+        >
+          <MessageSquare className="h-4 w-4" />
+          Kirim juga via WhatsApp ke Elsa
+        </a>
+        <p className="text-[11px] text-muted-foreground">
+          (Opsional — supaya Elsa langsung dapat notifikasi)
+        </p>
+
         <button
           type="button"
-          onClick={() => { setSubmitted(false); onClose() }}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-white transition"
+          onClick={() => {
+            setSubmitted(false)
+            setLastSubmission(null)
+            onClose()
+          }}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
           style={{ backgroundColor: 'var(--theme-primary)' }}
         >
           Tutup
@@ -245,7 +397,10 @@ function FeedbackView({ onClose }: { onClose: () => void }) {
     )
   }
 
-  const typeOptions: { value: 'kritik' | 'saran' | 'pertanyaan'; label: string }[] = [
+  const typeOptions: {
+    value: 'kritik' | 'saran' | 'pertanyaan'
+    label: string
+  }[] = [
     { value: 'kritik', label: 'Kritik' },
     { value: 'saran', label: 'Saran' },
     { value: 'pertanyaan', label: 'Pertanyaan' },
@@ -254,14 +409,20 @@ function FeedbackView({ onClose }: { onClose: () => void }) {
   return (
     <div className="space-y-4 p-4">
       <div>
-        <h3 className="mb-3 text-sm font-semibold text-foreground">Kritik & Saran</h3>
+        <h3 className="mb-3 text-sm font-semibold text-foreground">
+          Kritik & Saran
+        </h3>
         <p className="mb-4 text-xs text-muted-foreground">
-          Bantu Elsa meningkatkan pelayanan. Sampaikan kritik, saran, atau pertanyaan Anda.
+          Bantu Elsa meningkatkan pelayanan. Sampaikan kritik, saran, atau
+          pertanyaan Anda.
         </p>
       </div>
 
+      {/* Type selector */}
       <div>
-        <label className="mb-2 block text-xs font-medium text-muted-foreground">Jenis Feedback</label>
+        <label className="mb-2 block text-xs font-medium text-muted-foreground">
+          Jenis Feedback
+        </label>
         <div className="flex gap-2">
           {typeOptions.map((opt) => (
             <button
@@ -273,7 +434,14 @@ function FeedbackView({ onClose }: { onClose: () => void }) {
                   ? 'border-primary bg-secondary text-primary'
                   : 'border-border bg-white text-muted-foreground hover:border-primary/30'
               }`}
-              style={type === opt.value ? { borderColor: 'var(--theme-primary)', backgroundColor: 'var(--accent)' } : {}}
+              style={
+                type === opt.value
+                  ? {
+                      borderColor: 'var(--theme-primary)',
+                      backgroundColor: 'var(--accent)',
+                    }
+                  : {}
+              }
             >
               {opt.label}
             </button>
@@ -281,43 +449,105 @@ function FeedbackView({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
+      {/* Rating stars */}
       <div>
-        <label htmlFor="fb-name" className="mb-1 block text-xs font-medium text-muted-foreground">Nama *</label>
+        <label className="mb-2 block text-xs font-medium text-muted-foreground">
+          Rating Pelayanan
+        </label>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(star)}
+                onMouseEnter={() => setHoverRating(star)}
+                onMouseLeave={() => setHoverRating(0)}
+                className="transition active:scale-90"
+                aria-label={`${star} bintang`}
+              >
+                <Star
+                  className={`h-7 w-7 transition ${
+                    star <= (hoverRating || rating)
+                      ? 'fill-amber-400 text-amber-400'
+                      : 'text-muted-foreground/30'
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+          <span className="text-xs font-medium text-muted-foreground">
+            {RATING_LABELS[hoverRating || rating] || ''}
+          </span>
+        </div>
+      </div>
+
+      {/* Name */}
+      <div>
+        <label
+          htmlFor="fb-name"
+          className="mb-1 block text-xs font-medium text-muted-foreground"
+        >
+          Nama *
+        </label>
         <input
           id="fb-name"
           type="text"
           value={name}
-          onChange={(e) => { setName(e.target.value); setError('') }}
+          onChange={(e) => {
+            setName(e.target.value)
+            setError('')
+          }}
           placeholder="Nama lengkap Anda"
           className="h-11 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
+      {/* WhatsApp */}
       <div>
-        <label htmlFor="fb-wa" className="mb-1 block text-xs font-medium text-muted-foreground">WhatsApp (opsional)</label>
+        <label
+          htmlFor="fb-wa"
+          className="mb-1 block text-xs font-medium text-muted-foreground"
+        >
+          WhatsApp (opsional)
+        </label>
         <input
           id="fb-wa"
           type="tel"
           value={whatsapp}
-          onChange={(e) => { setWhatsapp(e.target.value); setError('') }}
+          onChange={(e) => {
+            setWhatsapp(e.target.value)
+            setError('')
+          }}
           placeholder="08xxxxxxxxxx"
           className="h-11 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
+      {/* Message */}
       <div>
-        <label htmlFor="fb-msg" className="mb-1 block text-xs font-medium text-muted-foreground">Pesan *</label>
+        <label
+          htmlFor="fb-msg"
+          className="mb-1 block text-xs font-medium text-muted-foreground"
+        >
+          Pesan *
+        </label>
         <textarea
           id="fb-msg"
           value={message}
-          onChange={(e) => { setMessage(e.target.value); setError('') }}
+          onChange={(e) => {
+            setMessage(e.target.value)
+            setError('')
+          }}
           placeholder="Tulis kritik, saran, atau pertanyaan Anda..."
           rows={4}
           className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
         />
       </div>
 
-      {error && <p className="text-xs font-medium text-rose-600">{error}</p>}
+      {error && (
+        <p className="text-xs font-medium text-rose-600">{error}</p>
+      )}
 
       <button
         type="button"
