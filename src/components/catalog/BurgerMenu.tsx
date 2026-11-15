@@ -145,7 +145,6 @@ function MenuView({
       label: 'New Release',
       href: '/',
       description: 'Produk terbaru',
-      badge: 'Segera hadir',
     },
     {
       icon: Tag,
