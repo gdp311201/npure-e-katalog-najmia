@@ -10,6 +10,7 @@ import { ProductCard } from '@/components/catalog/ProductCard'
 import { EmptyState } from '@/components/catalog/EmptyState'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProductFocusSection } from '@/components/catalog/ProductFocusSection'
+import { NewReleaseSection } from '@/components/catalog/NewReleaseSection'
 import {
   getCatalogSettings,
   getCatalogProducts,
@@ -220,6 +221,9 @@ export default function HomePage() {
 
         {/* Product Focus section — monthly highlighted products */}
         {!showEmptyState && <ProductFocusSection />}
+
+        {/* New Release section — auto-expiry by date */}
+        {!showEmptyState && <NewReleaseSection />}
 
         {/* Quiz CTA banner — personalisasi kalau profile sudah ada */}
         {!showEmptyState && (
