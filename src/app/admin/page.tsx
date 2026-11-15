@@ -1,5 +1,12 @@
 import Link from 'next/link'
-import { MessageSquare, Target, Tag, ArrowRight, ExternalLink } from 'lucide-react'
+import {
+  MessageSquare,
+  Target,
+  Tag,
+  ArrowRight,
+  ExternalLink,
+  Sparkles,
+} from 'lucide-react'
 import { getAdminSupabase } from '@/lib/admin-supabase'
 
 export const dynamic = 'force-dynamic'
@@ -7,13 +14,15 @@ export const dynamic = 'force-dynamic'
 export default async function AdminDashboard() {
   const supabase = getAdminSupabase()
 
-  const currentMonth = new Date().toISOString().slice(0, 7) // 'YYYY-MM'
+  const currentMonth = new Date().toISOString().slice(0, 7)
+  const nowIso = new Date().toISOString()
 
   // Fetch stats in parallel
   const [
     feedbackAll,
     feedbackUnread,
     focusThisMonth,
+    newReleaseActive,
     pricingWithDiscount,
   ] = await Promise.all([
     supabase
@@ -28,8 +37,15 @@ export default async function AdminDashboard() {
       .select('*', { count: 'exact', head: true })
       .eq('period_month', currentMonth)
       .eq('is_active', true),
+    // New Release: active (new_release_until > NOW())
     supabase
-      .from('catalog_products')
+      .from('v_catalog_products')
+      .select('*', { count: 'exact', head: true })
+      .not('new_release_until', 'is', null)
+      .gt('new_release_until', nowIso),
+    // Pricing: products with compare_at_price set (visible only)
+    supabase
+      .from('v_catalog_products')
       .select('compare_at_price', { count: 'exact', head: true })
       .not('compare_at_price', 'is', null),
   ])
@@ -54,13 +70,22 @@ export default async function AdminDashboard() {
       bg: 'bg-primary/5',
     },
     {
-      label: 'Produk dengan harga diskon',
+      label: 'New Release aktif',
+      value: newReleaseActive.count ?? 0,
+      total: null,
+      href: '/admin/new-release',
+      icon: Sparkles,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+    },
+    {
+      label: 'Produk dengan diskon',
       value: pricingWithDiscount.count ?? 0,
       total: null,
       href: '/admin/pricing',
       icon: Tag,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
+      color: 'text-rose-600',
+      bg: 'bg-rose-50',
     },
   ]
 
@@ -82,7 +107,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Link
             key={stat.label}
@@ -113,7 +138,9 @@ export default async function AdminDashboard() {
 
       {/* Quick actions */}
       <div className="rounded-xl border border-border/60 bg-card p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-foreground">Quick Actions</h2>
+        <h2 className="text-sm font-semibold text-foreground">
+          Quick Actions
+        </h2>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <Link
             href="/admin/feedback"
@@ -130,21 +157,19 @@ export default async function AdminDashboard() {
             <span className="text-foreground">Set produk fokus bulan ini</span>
           </Link>
           <Link
+            href="/admin/new-release"
+            className="flex items-center gap-2 rounded-lg border border-border/60 p-3 text-sm transition hover:border-primary/30 hover:bg-secondary/30"
+          >
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-foreground">Flag produk baru (New Release)</span>
+          </Link>
+          <Link
             href="/admin/pricing"
             className="flex items-center gap-2 rounded-lg border border-border/60 p-3 text-sm transition hover:border-primary/30 hover:bg-secondary/30"
           >
             <Tag className="h-4 w-4 text-primary" />
             <span className="text-foreground">Atur harga diskon (compare-at)</span>
           </Link>
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-lg border border-border/60 p-3 text-sm transition hover:border-primary/30 hover:bg-secondary/30"
-          >
-            <ExternalLink className="h-4 w-4 text-primary" />
-            <span className="text-foreground">Lihat katalog publik (tab baru)</span>
-          </a>
         </div>
       </div>
 
@@ -152,11 +177,11 @@ export default async function AdminDashboard() {
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
         <p className="text-xs leading-relaxed text-muted-foreground">
           <span className="font-semibold text-foreground">
-            💡 Tips:
+            💡 Status MVP:
           </span>{' '}
-          Panel ini masih dalam tahap MVP. Batch berikutnya: Feedback manager
-          (Batch 3), Produk Fokus manager (Batch 4), Harga &amp; Diskon manager
-          (Batch 5). Setelah semua selesai, Elsa bisa self-manage tanpa SQL.
+          Semua 4 panel admin udah aktif — Feedback, Produk Fokus, New Release,
+          dan Harga &amp; Diskon. Elsa bisa self-manage tanpa SQL. Untuk
+          perubahan produk (harga, stok, unhide), tetap lewat NPURE SO.
         </p>
       </div>
     </div>
