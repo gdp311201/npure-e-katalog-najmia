@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
@@ -6,6 +7,24 @@ import {
   type TokenPayload,
 } from '@/lib/admin-auth'
 import { AdminNav } from '@/app/admin/components/AdminNav'
+
+export const metadata: Metadata = {
+  title: 'Admin E-Katalog — NPURE',
+  description: 'Admin panel NPURE E-Katalog by Elsa',
+  manifest: '/manifest-admin.json',
+  applicationName: 'Admin E-Katalog',
+  appleMobileWebAppTitle: 'Admin E-Katalog',
+  appleMobileWebAppCapable: true,
+  appleMobileWebAppStatusBarStyle: 'default',
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/icon-192.png', sizes: '192x192' }],
+    shortcut: '/favicon.ico',
+  },
+}
 
 export default async function AdminLayout({
   children,
