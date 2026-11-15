@@ -46,9 +46,10 @@ export function ProductDetailActions({
 
     const msg = `${settings.whatsapp_default_message}
 
-Produk: ${product.name}
-Harga: ${formatPrice(product.current_price)}
-Jumlah: ${quantity}
+- Produk: ${product.name}
+- Harga: ${formatPrice(product.current_price)}${hasDiscount ? ` (sebelumnya ${formatPrice(comparePrice)})` : ''}
+- Jumlah: ${quantity}
+
 Subtotal: ${formatPrice(totalPrice)}
 Status stok: ${product.in_stock ? 'Tersedia' : 'Kosong (pre-order)'}
 
