@@ -114,7 +114,7 @@ Mohon info selengkapnya ya. Terima kasih!`
           />
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex gap-2">
           <Button
             type="button"
             size="lg"
