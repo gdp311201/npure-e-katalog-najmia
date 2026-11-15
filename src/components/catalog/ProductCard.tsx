@@ -76,9 +76,9 @@ export function ProductCard({
 
     const msg = `${waDefaultMsg}
 
-Produk: ${product.name}
-Harga: ${formatPrice(product.current_price)}
-Status stok: ${product.in_stock ? 'Tersedia' : 'Kosong (pre-order)'}
+- Produk: ${product.name}
+- Harga: ${formatPrice(product.current_price)}
+- Status stok: ${product.in_stock ? 'Tersedia' : 'Kosong (pre-order)'}
 
 Mohon info selengkapnya ya. Terima kasih!`
 
