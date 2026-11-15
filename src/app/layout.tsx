@@ -35,10 +35,18 @@ export const metadata: Metadata = {
     "Elsa",
   ],
   authors: [{ name: "NPURE E-Katalog by Elsa" }],
+  manifest: "/manifest.json",
+  applicationName: "NPURE E-Katalog",
+  appleMobileWebAppTitle: "NPURE E-Katalog",
+  appleMobileWebAppCapable: true,
+  appleMobileWebAppStatusBarStyle: "default",
   icons: {
-    icon: LOGO_URL,
-    apple: LOGO_URL,
-    shortcut: LOGO_URL,
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icon-192.png", sizes: "192x192" }],
+    shortcut: "/favicon.ico",
   },
   openGraph: {
     title: "NPURE E-Katalog by Elsa",
