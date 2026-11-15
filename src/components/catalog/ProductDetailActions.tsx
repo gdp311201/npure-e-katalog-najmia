@@ -114,22 +114,24 @@ Mohon info selengkapnya ya. Terima kasih!`
           />
         </div>
 
-        <div className="flex gap-2">
+               <div className="flex gap-2">
           <Button
             type="button"
-            size="lg"
+            size="default"
             variant="outline"
-            className="flex-1"
+            className="flex-1 h-auto flex-col gap-0.5 py-2.5 sm:flex-row sm:gap-2"
             onClick={handleAddToCart}
           >
-            <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
-            {addedToCart ? 'Ditambahkan!' : 'Tambah ke Keranjang'}
+            <ShoppingCart className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="text-xs leading-tight sm:text-sm">
+              {addedToCart ? 'Ditambahkan!' : 'Keranjang'}
+            </span>
           </Button>
 
           <Button
             type="button"
-            size="lg"
-            className="flex-1 text-white"
+            size="default"
+            className="flex-1 h-auto flex-col gap-0.5 py-2.5 text-white sm:flex-row sm:gap-2"
             style={{ backgroundColor: 'var(--theme-wa)' }}
             onClick={handleOrderWA}
             onMouseEnter={(e) =>
@@ -139,8 +141,10 @@ Mohon info selengkapnya ya. Terima kasih!`
               (e.currentTarget.style.backgroundColor = 'var(--theme-wa)')
             }
           >
-            <MessageCircle className="mr-2 h-5 w-5" aria-hidden="true" />
-            Pesan via WhatsApp
+            <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="text-xs leading-tight sm:text-sm">
+              Pesan via WA
+            </span>
           </Button>
         </div>
       </div>
