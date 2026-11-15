@@ -5,8 +5,6 @@ import Link from 'next/link'
 import {
   X,
   Home,
-  Sparkles,
-  Tag,
   MapPin,
   MessageSquare,
   ArrowLeft,
@@ -139,18 +137,6 @@ function MenuView({
       label: 'Katalog Produk',
       href: '/',
       description: 'Lihat semua produk NPURE',
-    },
-    {
-      icon: Sparkles,
-      label: 'New Release',
-      href: '/',
-      description: 'Produk terbaru',
-    },
-    {
-      icon: Tag,
-      label: 'Promo & Diskon',
-      href: '/',
-      description: 'Penawaran spesial',
     },
   ]
 
