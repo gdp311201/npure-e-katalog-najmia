@@ -9,7 +9,7 @@ import {
 import { useCartStore, type CartItem } from '@/lib/cart-store'
 import { formatPrice, buildWhatsAppLink } from '@/lib/supabase'
 
-const WA_NUMBER = '6281575859792'
+const WA_NUMBER = '628814166893'
 const WA_DEFAULT_MSG = 'Halo Elsa, saya mau pesan produk NPURE dari katalog:'
 
 const VARIANT_CHIP_CLASS: Record<string, string> = {
