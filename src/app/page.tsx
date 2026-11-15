@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/catalog/EmptyState'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProductFocusSection } from '@/components/catalog/ProductFocusSection'
 import { NewReleaseSection } from '@/components/catalog/NewReleaseSection'
+import { PromoSection } from '@/components/catalog/PromoSection'
 import {
   getCatalogSettings,
   getCatalogProducts,
@@ -224,6 +225,9 @@ export default function HomePage() {
 
         {/* New Release section — auto-expiry by date */}
         {!showEmptyState && <NewReleaseSection />}
+
+        {/* Promo & Diskon section — products with compare_at_price */}
+        {!showEmptyState && <PromoSection />}
 
         {/* Quiz CTA banner — personalisasi kalau profile sudah ada */}
         {!showEmptyState && (
