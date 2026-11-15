@@ -50,6 +50,7 @@ export interface CatalogProduct {
   how_to_use: string | null
   warnings: string | null
   compare_at_price: number | null
+  new_release_until: string | null
 }
 
 export interface CatalogSettings {
